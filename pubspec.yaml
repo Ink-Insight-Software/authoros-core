@@ -1,0 +1,16 @@
+name: authoros_core
+description: >-
+  The shared AuthorOS core: the record envelope, record and connection type
+  registries, built-in record types, the story structure and stable IDs. Pure
+  Dart. AuthorOS Write and the standalone applications depend on it; none of
+  them copies it.
+publish_to: none
+version: 0.1.0
+
+environment:
+  sdk: ">=3.6.0 <4.0.0"
+
+resolution: workspace
+
+dependencies:
+  crypto: ^3.0.7
