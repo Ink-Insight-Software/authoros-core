@@ -20,6 +20,15 @@ Exactly the import closure of the record engine, moved unchanged:
 
 66 files. It is pure Dart; its only dependency is `crypto`.
 
+**The archive joined it on September 28, 2026**, as the first step of the
+Worldsmith build plan's Phase 0 (`PLAN.md` §3.33). `archive/authoros_archive.dart`
+and `archive/archive_inspection.dart` write, read and inspect the `.authoros`
+format. They are pure Dart and every file they import was already here, so a
+standalone application can back up and restore without copying them. They
+keep their own `archive/` directory, so the guards still read them as the
+archive and not as Core. That brought one more dependency, `archive`, the
+same constraint AuthorOS Write already used.
+
 Some files are here because the built-in record registry names their record
 types, not because they are core in themselves: `curio_activation.dart`,
 `entitlement.dart`, `character_chat.dart` and `interrogation_session.dart`.
@@ -31,7 +40,8 @@ else.
 `flutter-author-studio-v1` is a pub workspace with this package as its one
 other member, so there is one resolution and one `pubspec.lock`.
 
-Every file that moved left a one-line export at its old path in `lib/core/`:
+Every file that moved left a one-line export at its old path in `lib/core/`
+(or `lib/archive/`):
 
 ```dart
 export 'package:authoros_core/connected_domain.dart';
