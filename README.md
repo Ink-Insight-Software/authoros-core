@@ -29,6 +29,11 @@ keep their own `archive/` directory, so the guards still read them as the
 archive and not as Core. That brought one more dependency, `archive`, the
 same constraint AuthorOS Write already used.
 
+**Two files the database needs joined it the same day** (ADR-0028):
+`progression/progression_domain.dart`, the progression ledger's model, and
+`image_media_type.dart`. Both are pure Dart. They had to be here before the
+database could leave the application for its own package, `authoros_persistence`.
+
 **The continuity model joined it the same day.** `continuity_domain.dart`
 (`ContinuityAnalyzer`, the warning types, severities and actions) and
 `continuity/continuity_models.dart` (the project-wide findings and structural
@@ -48,8 +53,9 @@ else.
 
 ## How AuthorOS Write uses it
 
-`flutter-author-studio-v1` is a pub workspace with this package as its one
-other member, so there is one resolution and one `pubspec.lock`.
+`flutter-author-studio-v1` is a pub workspace, so there is one resolution and
+one `pubspec.lock`. Its other members are this package and, since September
+28, 2026, `authoros_persistence`, the project database (ADR-0028).
 
 Every file that moved left a one-line export at its old path in `lib/core/`
 (or `lib/archive/`, `lib/continuity/`):
