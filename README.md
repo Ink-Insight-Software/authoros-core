@@ -1,5 +1,49 @@
 # authoros_core
 
+**This repository is its home as of September 28, 2026.** The package moved
+here from `flutter-author-studio-v1/authoros_core/` in
+`Ink-Insight-Software/AOS-Write`, with its history, so that AuthorOS Write and
+Casebook (`Ink-Insight-Software/AuthorOS-Expansions`) can both depend on one
+copy and neither has to reach into the other's repository. It is private.
+
+## Using it
+
+Depend on a tag, never a branch, so a change here reaches an application
+only when that application moves its pin:
+
+```yaml
+dependencies:
+  authoros_core:
+    git:
+      url: git@github.com:Ink-Insight-Software/authoros-core.git
+      ref: v0.1.0
+```
+
+Because the repository is private, each consumer's CI and web build needs
+read access: a read-only deploy key on this repository, with the private
+half held as a secret by the consumer, and never readable by a pull request
+from a fork.
+
+## Releasing
+
+1. Change the code with a pull request here; CI analyzes it.
+2. Bump `version` in `pubspec.yaml` and add a `CHANGELOG.md` entry.
+3. Tag the merge commit `v<version>` and push the tag.
+4. Move each consumer's `ref` in its own pull request, where its own tests
+   run against the new version.
+
+## Known carry-overs
+
+- The moved files' doc comments link to `../../docs/...` in AOS-Write. Those
+  links do not resolve here; the documents stay in AOS-Write.
+- `dart analyze` reports two unused declarations in
+  `built_in_record_types.dart` (`_world`, `_location`). They came with the
+  move and are left as they were.
+- The package's tests still live in AOS-Write, which reads its source. Moving
+  the ones that test only this package is follow-up work.
+
+## History before the move
+
 AuthorOS's shared core, extracted September 27, 2026 so that a standalone
 application can depend on the AuthorOS engine instead of copying it. The first
 such application is Casebook, which is built in `AuthorOS-Expansions`: see
