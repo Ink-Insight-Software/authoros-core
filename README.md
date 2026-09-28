@@ -29,6 +29,17 @@ keep their own `archive/` directory, so the guards still read them as the
 archive and not as Core. That brought one more dependency, `archive`, the
 same constraint AuthorOS Write already used.
 
+**The continuity model joined it the same day.** `continuity_domain.dart`
+(`ContinuityAnalyzer`, the warning types, severities and actions) and
+`continuity/continuity_models.dart` (the project-wide findings and structural
+conditions) are pure Dart and import nothing outside the core. They are the
+vocabulary a standalone application's continuity report speaks. The
+detectors that produce the findings did **not** move: `continuity/detectors.dart`
+and `services/world_continuity.dart` reach the Drift database and Flutter
+through `timeline_service`, `manuscript_continuity`, `project_survey` and
+`world_service`, 45 and 30 application files deep. Moving them needs a seam
+for what they read first. This change only moves files.
+
 Some files are here because the built-in record registry names their record
 types, not because they are core in themselves: `curio_activation.dart`,
 `entitlement.dart`, `character_chat.dart` and `interrogation_session.dart`.
@@ -41,7 +52,7 @@ else.
 other member, so there is one resolution and one `pubspec.lock`.
 
 Every file that moved left a one-line export at its old path in `lib/core/`
-(or `lib/archive/`):
+(or `lib/archive/`, `lib/continuity/`):
 
 ```dart
 export 'package:authoros_core/connected_domain.dart';
