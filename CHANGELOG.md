@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.0
+
+- The continuity seam from AOS-Write (its #550): the world hierarchy,
+  dismissals and timeline fields, then the manuscript model and the
+  continuity detectors, join the core. Carried over with their history.
+
 ## 0.2.0
 
 - `progression/progression_domain.dart` and `image_media_type.dart` join the

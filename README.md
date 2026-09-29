@@ -92,11 +92,24 @@ database could leave the application for its own package, `authoros_persistence`
 `continuity/continuity_models.dart` (the project-wide findings and structural
 conditions) are pure Dart and import nothing outside the core. They are the
 vocabulary a standalone application's continuity report speaks. The
-detectors that produce the findings did **not** move: `continuity/detectors.dart`
-and `services/world_continuity.dart` reach the Drift database and Flutter
-through `timeline_service`, `manuscript_continuity`, `project_survey` and
-`world_service`, 45 and 30 application files deep. Moving them needs a seam
-for what they read first. This change only moves files.
+detectors that produce the findings did not move that day. They reached the
+Drift database and Flutter through the services they imported.
+
+**The detectors joined it on September 29, 2026.** They read no service at
+run time. They reached Drift only because four pieces of pure code lived in
+service files, and those moved first:
+- `world_hierarchy.dart`;
+- `codex_dismissals.dart`;
+- `timeline_record_fields.dart`, with `timeline_domain.dart`;
+- `manuscript_model.dart`, the manuscript's data model split from
+  `ManuscriptStore`, with `narrative_voice.dart`.
+
+Then the engine moved: `continuity/detectors.dart`,
+`continuity/project_survey.dart`, `manuscript_continuity.dart`,
+`world_continuity.dart`, `entity_recognition.dart` and `story_vocabulary.dart`.
+A standalone application can now run every continuity detector over records
+it has read. Reading them stays with each application;
+`lib/continuity/continuity_engine.dart` does it for AuthorOS Write.
 
 Some files are here because the built-in record registry names their record
 types, not because they are core in themselves: `curio_activation.dart`,
