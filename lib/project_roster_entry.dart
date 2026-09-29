@@ -108,6 +108,43 @@ class ProjectRosterEntry {
   /// The same entry, archived at [at].
   ProjectRosterEntry archived(DateTime at) => copyWith(archivedAt: at);
 
+  /// The entry as the `.authoros` archive carries it, one line of
+  /// `data/projects.jsonl`.
+  ///
+  /// `id` is the project's, so the archive can sort and key the line the way
+  /// it keys every other entry. Timestamps are UTC ISO-8601, as everywhere
+  /// else. Added with the archive entry, so a backup carries the roster
+  /// (AOS-Write `PLAN.md` §3.35).
+  Map<String, Object?> toJson() => {
+        'id': project.id,
+        'project': project.toJson(),
+        'seriesId': seriesId,
+        'seriesPosition': seriesPosition,
+        'archivedAt': archivedAt?.toUtc().toIso8601String(),
+        'profileId': profileId,
+        'createdAt': createdAt?.toUtc().toIso8601String(),
+        'updatedAt': updatedAt?.toUtc().toIso8601String(),
+      };
+
+  /// The entry [toJson] wrote. A `seriesPosition` without a `seriesId` is
+  /// dropped, because a position means nothing outside a series.
+  factory ProjectRosterEntry.fromJson(Map<String, dynamic> json) {
+    DateTime? at(Object? value) =>
+        value is String ? DateTime.parse(value).toLocal() : null;
+    final seriesId = json['seriesId'] as String?;
+    return ProjectRosterEntry(
+      project: StarterProject.fromJson(
+        Map<String, dynamic>.from(json['project'] as Map),
+      ),
+      seriesId: seriesId,
+      seriesPosition: seriesId == null ? null : json['seriesPosition'] as int?,
+      archivedAt: at(json['archivedAt']),
+      profileId: json['profileId'] as String?,
+      createdAt: at(json['createdAt']),
+      updatedAt: at(json['updatedAt']),
+    );
+  }
+
   /// The same entry, back out of the archive.
   ///
   /// A separate method rather than `copyWith(archivedAt: null)`, for the same

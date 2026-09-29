@@ -12,6 +12,8 @@ import '../branch_domain.dart';
 import '../version_audit.dart';
 import '../revision_decision.dart';
 import '../writing_session.dart';
+import '../project_roster_entry.dart';
+import '../writing_series.dart';
 
 class AuthorOsArchiveLimits {
   const AuthorOsArchiveLimits({
@@ -36,6 +38,8 @@ class AuthorOsArchiveContents {
   const AuthorOsArchiveContents({
     required this.snapshot,
     this.manuscripts = const [],
+    this.projects = const [],
+    this.series = const [],
   });
 
   final ConnectedDomainSnapshot snapshot;
@@ -43,6 +47,18 @@ class AuthorOsArchiveContents {
   /// Raw `ManuscriptProjectSummary.toJson()` maps, prose included. Empty for
   /// an archive written before manuscripts were carried.
   final List<Map<String, dynamic>> manuscripts;
+
+  /// The project roster: each project's title, type, genre, word goal, series
+  /// place and archived state. Empty for an archive written before the roster
+  /// was carried, which a restore must read as *"this file says nothing about
+  /// the roster"*, not as *"there are no projects"*.
+  final List<ProjectRosterEntry> projects;
+
+  /// The series the roster's books belong to. Empty on the same terms.
+  final List<WritingSeries> series;
+
+  /// Whether this archive carries a roster at all.
+  bool get carriesRoster => projects.isNotEmpty;
 }
 
 class AuthorOsArchiveService {
@@ -60,6 +76,8 @@ class AuthorOsArchiveService {
     required String platform,
     required DateTime createdAt,
     Iterable<Map<String, Object?>> manuscripts = const [],
+    Iterable<ProjectRosterEntry> projects = const [],
+    Iterable<WritingSeries> series = const [],
   }) {
     InMemoryConnectedDomainRepository(initial: snapshot);
     final entries = <String, Uint8List>{
@@ -127,6 +145,21 @@ class AuthorOsArchiveService {
                 'id': prose.sceneId,
                 ...prose.toJson(),
               }),
+        ),
+      // The roster: which projects exist, and each one's title, type, genre,
+      // word goal, series place and archived state. It lives in its own table
+      // rather than the graph, so until September 29, 2026 it was not written
+      // at all, and a restore into an empty installation brought back every
+      // record and manuscript and no projects. Written only when there is a
+      // roster, so an archive without one stays byte-identical to one written
+      // before these entries existed.
+      if (projects.isNotEmpty)
+        'data/projects.jsonl': _jsonLines(
+          projects.map((entry) => entry.toJson()),
+        ),
+      if (series.isNotEmpty)
+        'data/series.jsonl': _jsonLines(
+          series.map((one) => one.toJson()),
         ),
       if (manuscripts.isNotEmpty)
         'data/manuscripts.jsonl': _jsonLines(
@@ -357,6 +390,18 @@ class AuthorOsArchiveService {
       manuscripts: files.containsKey('data/manuscripts.jsonl')
           ? _decodeJsonLines(files['data/manuscripts.jsonl'])
           : const [],
+      // Optional on read, like every entry added after the first archives:
+      // a file written before the roster was carried still restores.
+      projects: files.containsKey('data/projects.jsonl')
+          ? _decodeJsonLines(files['data/projects.jsonl'])
+              .map(ProjectRosterEntry.fromJson)
+              .toList()
+          : const [],
+      series: files.containsKey('data/series.jsonl')
+          ? _decodeJsonLines(files['data/series.jsonl'])
+              .map(WritingSeries.fromJson)
+              .toList()
+          : const [],
     );
   }
 
@@ -439,6 +484,8 @@ String _roleFor(String path) => switch (path) {
       'data/writing-sessions.jsonl' => 'writing-sessions',
       'data/revision-decisions.jsonl' => 'revision-decisions',
       'data/manuscripts.jsonl' => 'manuscripts',
+      'data/projects.jsonl' => 'projects',
+      'data/series.jsonl' => 'series',
       'content/scene-prose.jsonl' => 'scene-content',
       'data/records.jsonl' => 'records',
       'data/manuscript-nodes.jsonl' => 'manuscript-nodes',

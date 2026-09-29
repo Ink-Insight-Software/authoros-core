@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.4.0
+
+- **The archive carries the project roster.** Two optional entries,
+  `data/projects.jsonl` (`ProjectRosterEntry`) and `data/series.jsonl`
+  (`WritingSeries`), written only when there is a roster, so an archive without
+  one is byte-identical to before. `AuthorOsArchiveContents` gains `projects`,
+  `series` and `carriesRoster`; `ArchiveInspection` counts `projects`, and an
+  archive holding only a roster is no longer reported empty. Until now a
+  restore into an empty installation brought back every record and no
+  projects (AOS-Write `PLAN.md` §3.35).
+- `ProjectRosterEntry` gains `toJson` and `fromJson`.
+- An older build reading a 0.4.0 archive ignores the two entries: import
+  checks entries against the manifest and decodes only the ones it knows.
+
 ## 0.3.0
 
 - The continuity seam from AOS-Write (its #550): the world hierarchy,
