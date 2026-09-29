@@ -21,6 +21,7 @@ ArchiveInspection inspectionOf(AuthorOsArchiveContents contents) {
     scenesWithProse: snapshot.sceneProse.length,
     writingSessions: snapshot.writingSessions.length,
     revisionDecisions: snapshot.revisionDecisions.length,
+    projects: contents.projects.length,
   );
 }
 
@@ -33,6 +34,7 @@ class ArchiveInspection {
     required this.scenesWithProse,
     required this.writingSessions,
     this.revisionDecisions = 0,
+    this.projects = 0,
   });
 
   final int records;
@@ -46,16 +48,26 @@ class ArchiveInspection {
   /// working state back and not only their words.
   final int revisionDecisions;
 
+  /// Projects on the roster the archive carries: zero for an archive written
+  /// before the roster was, which says nothing about how many there were.
+  final int projects;
+
   /// True when the archive parsed, every checksum matched, and it holds
   /// something. An archive that verifies but is empty is a real answer and not
   /// a good one, so the two are reported apart.
   bool get isEmpty =>
-      records == 0 && links == 0 && manuscripts == 0 && scenesWithProse == 0;
+      records == 0 &&
+      links == 0 &&
+      manuscripts == 0 &&
+      scenesWithProse == 0 &&
+      projects == 0;
 
   /// One line for a screen: what an author would get back.
   String get summary {
     if (isEmpty) return 'This archive verified, but there is nothing in it.';
     final parts = <String>[
+      if (projects > 0)
+        '$projects ${_plural(projects, 'project', 'projects')}',
       if (records > 0) '$records ${_plural(records, 'record', 'records')}',
       if (links > 0) '$links ${_plural(links, 'connection', 'connections')}',
       if (scenesWithProse > 0)
