@@ -4,7 +4,8 @@
 `flutter-author-studio-v1/authoros_core/` in `Ink-Insight-Software/AOS-Write`,
 with its history, so that AuthorOS Write and Casebook
 (`Ink-Insight-Software/AuthorOS-Expansions`) can both depend on one copy and
-neither has to reach into the other's repository. It is private.
+neither has to reach into the other's repository. It is public, so both
+fetch it with no credential.
 
 > **Not yet the source of truth.** Until AOS-Write depends on this repository
 > instead of its own copy, AOS-Write's `flutter-author-studio-v1/authoros_core/`
@@ -12,8 +13,8 @@ neither has to reach into the other's repository. It is private.
 > tagged `Release` (0.1.0). Make no changes here until AOS-Write switches; a
 > change made here first would not reach AuthorOS Write.
 >
-> What holds the switch up: this repository is private, so each consumer's CI
-> and web build needs read access to it, and none has it yet.
+> Casebook already depends on this repository, pinned by commit. AuthorOS
+> Write switches in its own change.
 
 ## Using it
 
@@ -28,10 +29,9 @@ dependencies:
       ref: v0.1.0
 ```
 
-Because the repository is private, each consumer's CI and web build needs
-read access: a read-only deploy key on this repository, with the private
-half held as a secret by the consumer, and never readable by a pull request
-from a fork.
+Because the repository is public, a consumer's CI and web build need no
+credential to fetch it. Pinning a commit instead of a tag is fine too, and
+Casebook does.
 
 ## Releasing
 
