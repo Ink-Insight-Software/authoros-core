@@ -114,7 +114,7 @@ class ProjectRosterEntry {
   /// `id` is the project's, so the archive can sort and key the line the way
   /// it keys every other entry. Timestamps are UTC ISO-8601, as everywhere
   /// else. Added with the archive entry, so a backup carries the roster
-  /// (AOS-Write `PLAN.md` §3.35).
+  /// (AOS-Write `PLAN.md` §3.37).
   Map<String, Object?> toJson() => {
         'id': project.id,
         'project': project.toJson(),

@@ -9,7 +9,7 @@
   `series` and `carriesRoster`; `ArchiveInspection` counts `projects`, and an
   archive holding only a roster is no longer reported empty. Until now a
   restore into an empty installation brought back every record and no
-  projects (AOS-Write `PLAN.md` §3.35).
+  projects (AOS-Write `PLAN.md` §3.37).
 - `ProjectRosterEntry` gains `toJson` and `fromJson`.
 - An older build reading a 0.4.0 archive ignores the two entries: import
   checks entries against the manifest and decodes only the ones it knows.
