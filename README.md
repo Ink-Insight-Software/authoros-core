@@ -1,37 +1,33 @@
 # authoros_core
 
-**This repository will be its home.** The package was copied here from
+**The shared AuthorOS core, and its one copy.** The package moved here from
 `flutter-author-studio-v1/authoros_core/` in `Ink-Insight-Software/AOS-Write`,
-with its history, so that AuthorOS Write and Casebook
-(`Ink-Insight-Software/AuthorOS-Expansions`) can both depend on one copy and
-neither has to reach into the other's repository. It is public, so both
-fetch it with no credential.
+with its history. AuthorOS Write (since AOS-Write #549) and Casebook
+(`Ink-Insight-Software/AuthorOS-Expansions`) both depend on it, pinned by
+commit, and neither keeps a copy. It is public, so both fetch it with no
+credential.
 
-> **Not yet the source of truth.** Until AOS-Write depends on this repository
-> instead of its own copy, AOS-Write's `flutter-author-studio-v1/authoros_core/`
-> is the copy that is built and changed. This repository is a snapshot of it,
-> tagged `Release` (0.1.0). Make no changes here until AOS-Write switches; a
-> change made here first would not reach AuthorOS Write.
->
-> Casebook already depends on this repository, pinned by commit. AuthorOS
-> Write switches in its own change.
+**A change to the core is made here first.** It reaches an application only
+when that application moves its pin, and that application's suite runs
+against it before it ships. AOS-Write pins it in two places,
+`flutter-author-studio-v1/pubspec.yaml` and `authoros_persistence/pubspec.yaml`,
+which move together.
 
 ## Using it
 
-Depend on a tag, never a branch, so a change here reaches an application
+Depend on a commit, never a branch, so a change here reaches an application
 only when that application moves its pin:
 
 ```yaml
 dependencies:
   authoros_core:
     git:
-      url: git@github.com:Ink-Insight-Software/authoros-core.git
-      ref: v0.1.0
+      url: https://github.com/Ink-Insight-Software/authoros-core.git
+      ref: 2dafaf3699c9f4e2d33b2af26141370cba64ff29 # 0.3.0
 ```
 
 Because the repository is public, a consumer's CI and web build need no
-credential to fetch it. Pinning a commit instead of a tag is fine too, and
-Casebook does.
+credential to fetch it. A tag works too, but both applications pin commits.
 
 ## Releasing
 
