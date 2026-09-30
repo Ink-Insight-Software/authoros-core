@@ -40,6 +40,7 @@ class AuthorOsArchiveContents {
     this.manuscripts = const [],
     this.projects = const [],
     this.series = const [],
+    this.sceneAuthorship = const [],
   });
 
   final ConnectedDomainSnapshot snapshot;
@@ -56,6 +57,14 @@ class AuthorOsArchiveContents {
 
   /// The series the roster's books belong to. Empty on the same terms.
   final List<WritingSeries> series;
+
+  /// Each scene's authorship record — where its characters came from — as
+  /// the application wrote it. Opaque here, like [manuscripts]: what an
+  /// origin *is* belongs to the application, and each map carries the digest
+  /// of the text it describes, so a record that no longer matches its prose
+  /// is recognised there rather than trusted. Empty for an archive written
+  /// before records were carried.
+  final List<Map<String, dynamic>> sceneAuthorship;
 
   /// Whether this archive carries a roster at all.
   bool get carriesRoster => projects.isNotEmpty;
@@ -78,6 +87,7 @@ class AuthorOsArchiveService {
     Iterable<Map<String, Object?>> manuscripts = const [],
     Iterable<ProjectRosterEntry> projects = const [],
     Iterable<WritingSeries> series = const [],
+    Iterable<Map<String, Object?>> sceneAuthorship = const [],
   }) {
     InMemoryConnectedDomainRepository(initial: snapshot);
     final entries = <String, Uint8List>{
@@ -161,6 +171,12 @@ class AuthorOsArchiveService {
         'data/series.jsonl': _jsonLines(
           series.map((one) => one.toJson()),
         ),
+      // Where the book's words came from, beside the book. Written only when
+      // there is a record, so an archive without one is byte-identical to one
+      // written before this entry existed; each line carries an `id` (the
+      // scene), as every other entry does.
+      if (sceneAuthorship.isNotEmpty)
+        'content/scene-authorship.jsonl': _jsonLines(sceneAuthorship),
       if (manuscripts.isNotEmpty)
         'data/manuscripts.jsonl': _jsonLines(
           // `_jsonLines` sorts on `id`, and a manuscript is keyed by its
@@ -401,6 +417,9 @@ class AuthorOsArchiveService {
           ? _decodeJsonLines(files['data/series.jsonl'])
               .map(WritingSeries.fromJson)
               .toList()
+          : const [],
+      sceneAuthorship: files.containsKey('content/scene-authorship.jsonl')
+          ? _decodeJsonLines(files['content/scene-authorship.jsonl'])
           : const [],
     );
   }
