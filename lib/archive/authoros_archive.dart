@@ -506,6 +506,7 @@ String _roleFor(String path) => switch (path) {
       'data/projects.jsonl' => 'projects',
       'data/series.jsonl' => 'series',
       'content/scene-prose.jsonl' => 'scene-content',
+      'content/scene-authorship.jsonl' => 'scene-authorship',
       'data/records.jsonl' => 'records',
       'data/manuscript-nodes.jsonl' => 'manuscript-nodes',
       'data/links.jsonl' => 'links',
