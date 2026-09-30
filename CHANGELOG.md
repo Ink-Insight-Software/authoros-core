@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.5.0
+
+- **The archive carries each scene's authorship record.** One optional entry,
+  `content/scene-authorship.jsonl`, written only when the application passes
+  records to `exportSnapshot(sceneAuthorship:)`, so an archive without any is
+  byte-identical to before. Each line is an opaque map with an `id` (the
+  scene): what an origin means, and the digest that ties a record to its
+  text, belong to the application (AOS-Write `PLAN.md` §3.39).
+  `AuthorOsArchiveContents` gains `sceneAuthorship`.
+- An older build reading a 0.5.0 archive ignores the entry, as 0.4.0's
+  roster entries are ignored.
+
 ## 0.4.0
 
 - **The archive carries the project roster.** Two optional entries,
