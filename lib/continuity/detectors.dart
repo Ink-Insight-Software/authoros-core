@@ -27,10 +27,12 @@ import '../manuscript_continuity.dart';
 import '../timeline_domain.dart';
 import '../timeline_record_fields.dart';
 import 'continuity_models.dart';
+import 'bible_rule_detector.dart';
 import 'calendar_detector.dart';
 import 'project_survey.dart';
 
 export 'calendar_detector.dart' show detectCalendarConflicts;
+export 'bible_rule_detector.dart' show detectBibleRules;
 
 /// Names shorter than this are never treated as a prose mention, so common
 /// short words do not manufacture findings. Matches the Manuscript workspace's
@@ -45,6 +47,7 @@ List<StructuralFinding> detectAll(ProjectSurvey survey) => [
       ...detectUnresolvedRelationships(survey),
       ...detectTimelineConflicts(survey),
       ...detectCalendarConflicts(survey),
+      ...detectBibleRules(survey),
       ...detectResearchGaps(survey),
       ...detectUnusedWorldbuilding(survey),
     ]..sort(compareFindings);

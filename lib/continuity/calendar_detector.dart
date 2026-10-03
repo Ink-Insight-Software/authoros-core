@@ -118,7 +118,7 @@ Iterable<StructuralFinding> _beforeBirth(
   Map<String, TimelineCalendar> calendars,
 ) sync* {
   for (final character in survey.characters) {
-    final birth = _birthOf(character);
+    final birth = characterBirthDate(character);
     if (birth == null) continue;
     final birthCalendar = calendars[birth.calendarId];
     if (birthCalendar == null) continue;
@@ -159,7 +159,9 @@ int? _yearOnly(TimelineCalendar calendar, TimelineDate date) =>
         (date.day ?? 0);
 
 /// The character's birth date: the true record first, then the public one.
-TimelineDate? _birthOf(AuthorRecord character) {
+/// Shared with `detectBibleRules`, whose *always before* rule dates a
+/// character by their birth.
+TimelineDate? characterBirthDate(AuthorRecord character) {
   for (final field in const ['birth.trueDate', 'birth.publicDate']) {
     final value = character.fields[field];
     Object? json = value;

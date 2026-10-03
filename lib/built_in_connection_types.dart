@@ -427,6 +427,17 @@ class BuiltInConnectionTypes {
       inverseLabel: 'Contains',
       builtIn: true,
       sourcePackId: 'authoros-core',
+      // Where an entry sits in a bible it is part of (`bible.dart`,
+      // AOS-Write PLAN.md §3.46). Optional, and meaningless on any other
+      // `partOf`, which carries none.
+      metadataFields: [
+        RecordFieldDefinition(
+          id: 'bibleSection',
+          label: 'Bible section',
+          type: RecordFieldType.shortText,
+          order: 0,
+        ),
+      ],
     ),
     // The series spine. Typed on both endpoints rather than reusing the
     // wildcard `partOf`, so a book's place in its series is a fact the

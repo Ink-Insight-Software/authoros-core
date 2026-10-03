@@ -64,6 +64,11 @@ enum StructuralCondition {
   /// have, a festival on the wrong day, an event before a birth, a scene
   /// whose words name another month (AOS-Write PLAN.md §3.45).
   calendarConflict,
+
+  /// A rule the author wrote in one of their bibles that a record breaks —
+  /// *every House has a sigil*, *a throne has one ruler* (AOS-Write PLAN.md
+  /// §3.46).
+  bibleRule,
 }
 
 extension StructuralConditionData on StructuralCondition {
@@ -79,6 +84,7 @@ extension StructuralConditionData on StructuralCondition {
         StructuralCondition.researchGap => 'Research gap',
         StructuralCondition.unusedWorldbuilding => 'Unused worldbuilding',
         StructuralCondition.calendarConflict => 'Calendar conflict',
+        StructuralCondition.bibleRule => 'Broken bible rule',
       };
 
   /// One line explaining what the condition means, shown under the group
@@ -104,6 +110,8 @@ extension StructuralConditionData on StructuralCondition {
           'Built, and not yet drawn on.',
         StructuralCondition.calendarConflict =>
           'Dates the world\'s own calendar disagrees with.',
+        StructuralCondition.bibleRule =>
+          'Records that break a rule you wrote about your world.',
       };
 
   /// The Studio that owns the records this condition is about.
@@ -117,7 +125,8 @@ extension StructuralConditionData on StructuralCondition {
         StructuralCondition.calendarConflict =>
           ContinuityDestination.timeline,
         StructuralCondition.locationGap ||
-        StructuralCondition.unusedWorldbuilding =>
+        StructuralCondition.unusedWorldbuilding ||
+        StructuralCondition.bibleRule =>
           ContinuityDestination.world,
         StructuralCondition.castGap => ContinuityDestination.characters,
         StructuralCondition.researchGap => ContinuityDestination.research,

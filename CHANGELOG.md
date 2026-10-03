@@ -38,6 +38,15 @@
   epoch, formats, conversion and both birth dates stay unmarked and free.
 - `detectCalendarConflicts` matches names with `mentionsName`, the one
   definition of a mention.
+- **The Codex Bible System** (AOS-Write `PLAN.md` §3.46). `bible.dart`: a
+  bible type is a project-scoped record type with entry sections in
+  `extensionData['bible']` (`BibleTypes`, `BibleEntrySection`); entries join
+  their bible by `partOf`, whose metadata declares `bibleSection`; rules an
+  author writes (`BibleRule`, `BibleRuleKind`, `BibleRules` under
+  `_bible.rules`). `bible_templates.dart`: nine starter bibles.
+  `hidden_truth.dart`: a hidden truth beside any field (`_truth.values`).
+- Continuity: `detectBibleRules`, run by `detectAll`, reports the new
+  `StructuralCondition.bibleRule`. `characterBirthDate` is public for it.
 - `StoryClockLinks` moves here from AOS Write (`story_clock_links.dart`).
 - `AuthorRecord.copyWith` can change `extensionData`.
 
