@@ -59,6 +59,11 @@ enum StructuralCondition {
 
   /// World entities with no connection to the manuscript.
   unusedWorldbuilding,
+
+  /// A date the world's own calendar says cannot be right: a day it does not
+  /// have, a festival on the wrong day, an event before a birth, a scene
+  /// whose words name another month (AOS-Write PLAN.md §3.45).
+  calendarConflict,
 }
 
 extension StructuralConditionData on StructuralCondition {
@@ -73,6 +78,7 @@ extension StructuralConditionData on StructuralCondition {
         StructuralCondition.castGap => 'Cast gap',
         StructuralCondition.researchGap => 'Research gap',
         StructuralCondition.unusedWorldbuilding => 'Unused worldbuilding',
+        StructuralCondition.calendarConflict => 'Calendar conflict',
       };
 
   /// One line explaining what the condition means, shown under the group
@@ -96,6 +102,8 @@ extension StructuralConditionData on StructuralCondition {
           'Research in use with nothing to cite.',
         StructuralCondition.unusedWorldbuilding =>
           'Built, and not yet drawn on.',
+        StructuralCondition.calendarConflict =>
+          'Dates the world\'s own calendar disagrees with.',
       };
 
   /// The Studio that owns the records this condition is about.
@@ -105,7 +113,8 @@ extension StructuralConditionData on StructuralCondition {
         StructuralCondition.unresolvedRelationship =>
           ContinuityDestination.characters,
         StructuralCondition.orphanPlot => ContinuityDestination.plot,
-        StructuralCondition.timelineConflict =>
+        StructuralCondition.timelineConflict ||
+        StructuralCondition.calendarConflict =>
           ContinuityDestination.timeline,
         StructuralCondition.locationGap ||
         StructuralCondition.unusedWorldbuilding =>

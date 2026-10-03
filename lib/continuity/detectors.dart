@@ -27,7 +27,10 @@ import '../manuscript_continuity.dart';
 import '../timeline_domain.dart';
 import '../timeline_record_fields.dart';
 import 'continuity_models.dart';
+import 'calendar_detector.dart';
 import 'project_survey.dart';
+
+export 'calendar_detector.dart' show detectCalendarConflicts;
 
 /// Names shorter than this are never treated as a prose mention, so common
 /// short words do not manufacture findings. Matches the Manuscript workspace's
@@ -41,6 +44,7 @@ List<StructuralFinding> detectAll(ProjectSurvey survey) => [
       ...detectOrphanPlots(survey),
       ...detectUnresolvedRelationships(survey),
       ...detectTimelineConflicts(survey),
+      ...detectCalendarConflicts(survey),
       ...detectResearchGaps(survey),
       ...detectUnusedWorldbuilding(survey),
     ]..sort(compareFindings);
