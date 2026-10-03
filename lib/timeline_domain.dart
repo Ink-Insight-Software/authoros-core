@@ -352,7 +352,10 @@ class TimelineCalendar {
       if (month == null) {
         throw ArgumentError('A day requires a month.');
       }
-      if (day < 1 || day > months[month - 1].length) {
+      // A month of unknown length (0) takes any day from 1: the author has
+      // not said how long it is, so no day can be past its end.
+      final length = months[month - 1].length;
+      if (day < 1 || (length > 0 && day > length)) {
         throw ArgumentError('Day $day is invalid for month $month.');
       }
     }
