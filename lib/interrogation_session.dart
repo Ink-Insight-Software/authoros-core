@@ -319,6 +319,7 @@ class InterrogationRecordTypes {
     sourcePackId: 'authoros-character-core',
     permissions: {'editableDefinition': false},
     exportBehavior: {'includeStructuredFields': true},
-    extensionData: {'interrogation': true},
+    // Never a template: a session exists because a conversation happened.
+    extensionData: {'interrogation': true, 'selectableForNewRecords': false},
   );
 }

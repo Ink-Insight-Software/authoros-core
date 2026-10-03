@@ -10,6 +10,10 @@
   ("Fears & Secrets — Vincenzo") as a character who never appears in the
   manuscript. `characterNotesTypeIds` names the two types for surfaces that
   list every record rather than selecting by category.
+- Both session types declare `selectableForNewRecords: false`, so a
+  template picker no longer offers them as something to create.
+- `ProjectSurvey.from` leaves character notes out of the records it reads, so
+  no detector or provocation counts an interview as part of the story.
 - No stored data changes. A record's category comes from its type, and both
   applications find sessions by type id, not category.
 

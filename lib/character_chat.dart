@@ -845,6 +845,7 @@ class CharacterChatRecordTypes {
     sourcePackId: 'authoros-character-core',
     permissions: {'editableDefinition': false},
     exportBehavior: {'includeStructuredFields': true},
-    extensionData: {'characterChat': true},
+    // Never a template: a session exists because an interview started.
+    extensionData: {'characterChat': true, 'selectableForNewRecords': false},
   );
 }
