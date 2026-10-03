@@ -23,6 +23,7 @@ import 'dart:convert';
 
 import '../connected_domain.dart';
 import '../continuity_domain.dart';
+import '../entity_recognition.dart';
 import '../story_clock_links.dart';
 import '../timeline_domain.dart';
 import '../timeline_record_fields.dart';
@@ -31,7 +32,7 @@ import 'continuity_models.dart';
 import 'project_survey.dart';
 
 /// Names shorter than this are never matched in prose, as for mentions.
-const _shortestName = 4;
+const _shortestName = kMinimumMentionLength;
 
 List<StructuralFinding> detectCalendarConflicts(ProjectSurvey survey) {
   final calendars = <String, TimelineCalendar>{
@@ -84,7 +85,7 @@ Iterable<StructuralFinding> _festivalTiming(
   final title = record.title.toLowerCase();
   for (final special in calendar.specialDates) {
     if (!special.isPlaced || special.name.length < _shortestName) continue;
-    if (!_containsWord(title, special.name.toLowerCase())) continue;
+    if (!mentionsName(title, special.name.toLowerCase())) continue;
     if (special.fallsOn(start.month, start.day)) continue;
     final kept = special.day == null
         ? 'the whole of ${_monthName(calendar, special.month)}'
@@ -180,18 +181,18 @@ Iterable<StructuralFinding> _proseNamesAnotherMonth(
     if (month == null || month < 1 || month > calendar.months.length) continue;
     final prose = survey.proseOfScene(scene);
     final own = calendar.months[month - 1].name.toLowerCase();
-    if (own.length >= _shortestName && _containsWord(prose, own)) continue;
+    if (own.length >= _shortestName && mentionsName(prose, own)) continue;
     final named = <String>[
       for (final (index, other) in calendar.months.indexed)
         if (index + 1 != month &&
             other.name.length >= _shortestName &&
-            _containsWord(prose, other.name.toLowerCase()))
+            mentionsName(prose, other.name.toLowerCase()))
           other.name,
       for (final special in calendar.specialDates)
         if (special.isPlaced &&
             special.month != month &&
             special.name.length >= _shortestName &&
-            _containsWord(prose, special.name.toLowerCase()))
+            mentionsName(prose, special.name.toLowerCase()))
           special.name,
     ];
     if (named.isEmpty) continue;
@@ -245,7 +246,3 @@ String _monthName(TimelineCalendar calendar, int? month) =>
     month != null && month >= 1 && month <= calendar.months.length
         ? calendar.months[month - 1].name
         : 'month $month';
-
-bool _containsWord(String haystack, String word) =>
-    RegExp('(^|[^a-z0-9])${RegExp.escape(word)}(\$|[^a-z0-9])')
-        .hasMatch(haystack);
