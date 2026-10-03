@@ -209,6 +209,17 @@ class ProjectSurvey {
   /// book at all?" questions that do not care which scene.
   late final String allProse = _scenes.map(proseOfScene).join('\n');
 
+  /// Every scene's prose as written, capitals and all. Only for the question
+  /// case answers: whether a word that could be a name is written as one.
+  late final String allProseAsWritten = _scenes
+      .map((scene) => [
+            scene.title,
+            scene.content,
+            scene.notes,
+            scene.timeLabel,
+          ].join('\n'))
+      .join('\n');
+
   /// The mentions the author has dismissed, keyed by [MentionDismissal.keyFor].
   ///
   /// Read out of the records the survey already holds rather than through a

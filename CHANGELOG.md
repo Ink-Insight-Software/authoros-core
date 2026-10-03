@@ -1,5 +1,33 @@
 # Changelog
 
+## 0.7.0
+
+Continuity reports what is really in the manuscript. Each item below was a
+finding it got wrong on an ordinary project.
+
+- **A character answers to their first name.** `ManuscriptContinuity.charactersNamed`
+  matches a full name or alias, then a first name. A POV of "Kali" is Kali
+  Vale, not a missing character with a *Create "Kali"* that made a duplicate.
+  A first name two characters share is not reported as missing. The orphan
+  check counts a unique first name written capitalised, so "Will" in prose
+  is Will Turner and "will" is not; `ProjectSurvey.allProseAsWritten` keeps
+  the capitals for that one question.
+- **A location ignores case, spacing and a leading "The"** (`bareName`). A
+  scene set in "Docks" finds The Docks instead of offering to create a second
+  one.
+- **A world entity named in the prose but not connected is reported once**,
+  as an unlinked mention with *Connect*, and no longer also as unused
+  worldbuilding. Its *Open Studio* goes to the Studio that owns the record:
+  `StructuralFinding` takes an optional `destination`.
+- **A plotline connected to its chapter has scenes.** It was reported as
+  empty, unlike every other check, which reads a chapter as covering its
+  scenes.
+- **Relationship notices are quieter.** Only arcs marked *active* are open;
+  planned, unset and abandoned are not reported. Only links of a kind that
+  changes (enemy, rival, partner, ally, mentor) want an arc, not `knows`,
+  family or friendship. Each kind folds into one notice however many there
+  are.
+
 ## 0.6.0
 
 - **Character Chat sessions are character notes, not characters.**
