@@ -11,6 +11,7 @@
 
 import 'connected_domain.dart';
 import 'record_types.dart';
+import 'story_vocabulary.dart';
 
 /// The id of the record type a chat session persists as.
 ///
@@ -782,7 +783,9 @@ class CharacterChatRecordTypes {
         'One Character Chat interview: its prompts, answers, and where each '
         'accepted answer went.',
     icon: 'forum',
-    categoryId: 'characters',
+    // Not 'characters': a session is a note about a character, not one.
+    // See [characterNotesCategoryId].
+    categoryId: characterNotesCategoryId,
     baseTypeId: 'general-lore',
     fields: [
       RecordFieldDefinition(
@@ -842,6 +845,7 @@ class CharacterChatRecordTypes {
     sourcePackId: 'authoros-character-core',
     permissions: {'editableDefinition': false},
     exportBehavior: {'includeStructuredFields': true},
-    extensionData: {'characterChat': true},
+    // Never a template: a session exists because an interview started.
+    extensionData: {'characterChat': true, 'selectableForNewRecords': false},
   );
 }

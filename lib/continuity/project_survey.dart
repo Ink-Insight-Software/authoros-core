@@ -73,7 +73,12 @@ class ProjectSurvey {
         projectId: projectId,
         projectTitle: projectTitle,
         manuscript: manuscript,
-        records: records,
+        // Notes about a character are not part of the story the survey reads:
+        // not cast, not names to look for in the prose, not records to count.
+        records: [
+          for (final record in records)
+            if (!characterNotesTypeIds.contains(record.typeId)) record,
+        ],
         links: links,
         categoryByTypeId: {
           for (final definition in typeDefinitions)
