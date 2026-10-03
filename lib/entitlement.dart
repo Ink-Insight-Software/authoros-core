@@ -186,7 +186,24 @@ enum PaidProduct {
   /// Shut until `curio_products` carries a `curio-calendar-bible` row with a
   /// live Stripe price. An author who already wrote lore keeps it: a field
   /// with a stored value is never withheld.
-  calendarBible;
+  calendarBible,
+
+  /// AOS Casebook — sold as its own application, and since October 3, 2026
+  /// in AuthorOS Write as well, by the owner's decision (AOS-Write
+  /// `PLAN.md` §3.46). In Write it opens the crime case bible. One wire id
+  /// in both, so a purchase in either is honoured by the other.
+  aosCasebook,
+
+  /// AOS Lorekeeper — deep lore. In Write it opens the magic and mythology
+  /// bibles (`PLAN.md` §3.46). The Archive, canon status and the
+  /// canon-conflict engine stay free, as the Lorekeeper map found they must.
+  aosLorekeeper,
+
+  /// Codex Bibles — the upgrade over the free bibles: the custom bible
+  /// builder, author-written rules, hidden truths, bible export, and the
+  /// political system bible (`PLAN.md` §3.46). The free bibles — blank,
+  /// faction, creature, calendar — and their pages and entries never need it.
+  aosCodexBibles;
 
   /// The wire name, fixed independently of the Dart identifier.
   String get id => switch (this) {
@@ -201,6 +218,9 @@ enum PaidProduct {
         PaidProduct.aosCommonRoom => 'aos-common-room',
         PaidProduct.bookplateMaker => 'curio-bookplate-maker',
         PaidProduct.calendarBible => 'curio-calendar-bible',
+        PaidProduct.aosCasebook => 'aos-casebook',
+        PaidProduct.aosLorekeeper => 'aos-lorekeeper',
+        PaidProduct.aosCodexBibles => 'aos-codex-bibles',
       };
 
   /// Whether this was once sold and is not offered any more.
@@ -239,7 +259,10 @@ enum PaidProduct {
         PaidProduct.aosCommonRoom ||
         PaidProduct.bookplateMaker ||
         // Added October 3, 2026, with the value. On sale, not retired.
-        PaidProduct.calendarBible =>
+        PaidProduct.calendarBible ||
+        PaidProduct.aosCasebook ||
+        PaidProduct.aosLorekeeper ||
+        PaidProduct.aosCodexBibles =>
           false,
       };
 
@@ -273,7 +296,10 @@ enum PaidProduct {
         PaidProduct.aosHeartsAndTensions ||
         PaidProduct.aosCompanion ||
         PaidProduct.aosCommonRoom ||
-        PaidProduct.calendarBible =>
+        PaidProduct.calendarBible ||
+        PaidProduct.aosCasebook ||
+        PaidProduct.aosLorekeeper ||
+        PaidProduct.aosCodexBibles =>
           false,
         PaidProduct.bookplateMaker => true,
       };

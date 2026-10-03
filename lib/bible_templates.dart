@@ -43,7 +43,13 @@ class BibleTemplate {
     this.sections = const [],
     this.entrySections = const [],
     this.editor = 'fields',
+    this.soldWith,
   });
+
+  /// The capability that sells this template, or null for a free one —
+  /// the same marker a field carries (`RecordFieldDefinition.soldWith`),
+  /// resolved the same way. AOS-Write `PLAN.md` §3.46 has the line.
+  final String? soldWith;
 
   final String id;
   final String name;
@@ -141,6 +147,7 @@ const bibleTemplates = <BibleTemplate>[
   ),
   BibleTemplate(
     id: 'magic',
+    soldWith: 'bibles.lore',
     name: 'Magic bible',
     description: 'Where power comes from, what it costs, who may use it, and '
         'the spells, schools and limits that follow.',
@@ -233,6 +240,7 @@ const bibleTemplates = <BibleTemplate>[
   ),
   BibleTemplate(
     id: 'case',
+    soldWith: 'bibles.case',
     name: 'Crime case bible',
     description: 'One case, solved on paper before it is written: the crime, '
         'the suspects, the clues, the secrets, and the solution.',
@@ -264,6 +272,7 @@ const bibleTemplates = <BibleTemplate>[
   ),
   BibleTemplate(
     id: 'romance',
+    soldWith: 'hearts.romanceBible',
     name: 'Romance tension bible',
     description: 'Two people, the wound each carries, what keeps them apart, '
         'and the beats that bring them together.',
@@ -297,6 +306,7 @@ const bibleTemplates = <BibleTemplate>[
   ),
   BibleTemplate(
     id: 'politics',
+    soldWith: 'bibles.politics',
     name: 'Political system bible',
     description: 'Who rules, how, and by what right: governments, laws, '
         'offices, treaties and the factions around them.',
@@ -324,6 +334,7 @@ const bibleTemplates = <BibleTemplate>[
   ),
   BibleTemplate(
     id: 'myth',
+    soldWith: 'bibles.lore',
     name: 'Mythology bible',
     description: 'Gods, legends, sacred stories and the faiths built on them.',
     icon: 'temple_buddhist',

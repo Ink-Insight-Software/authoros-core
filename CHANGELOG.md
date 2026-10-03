@@ -45,6 +45,9 @@
   author writes (`BibleRule`, `BibleRuleKind`, `BibleRules` under
   `_bible.rules`). `bible_templates.dart`: nine starter bibles.
   `hidden_truth.dart`: a hidden truth beside any field (`_truth.values`).
+- `PaidProduct.aosCasebook` (`aos-casebook`), `aosLorekeeper`
+  (`aos-lorekeeper`) and `aosCodexBibles` (`aos-codex-bibles`).
+  `BibleTemplate.soldWith` marks a paid starter bible.
 - Continuity: `detectBibleRules`, run by `detectAll`, reports the new
   `StructuralCondition.bibleRule`. `characterBirthDate` is public for it.
 - `StoryClockLinks` moves here from AOS Write (`story_clock_links.dart`).
