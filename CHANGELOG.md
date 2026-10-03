@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.6.0
+
+- **Character Chat sessions are character notes, not characters.**
+  `character-chat-session` and `interrogation-session` move from the
+  `characters` category to the new `characterNotesCategoryId`
+  (`'character-notes'`) in `story_vocabulary.dart`. Everything that read the
+  cast by category took them for characters: Continuity reported an interview
+  ("Fears & Secrets — Vincenzo") as a character who never appears in the
+  manuscript. `characterNotesTypeIds` names the two types for surfaces that
+  list every record rather than selecting by category.
+- No stored data changes. A record's category comes from its type, and both
+  applications find sessions by type id, not category.
+
 ## 0.5.0
 
 - **The archive carries each scene's authorship record.** One optional entry,
