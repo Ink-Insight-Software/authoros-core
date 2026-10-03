@@ -202,13 +202,11 @@ class ManuscriptContinuity {
     // 1. POV: unknown character, or a known character who is not connected.
     final pov = scene.pov.trim().isEmpty ? chapter.pov.trim() : scene.pov.trim();
     if (pov.isNotEmpty && findings.length < maxFindingsPerScene) {
-      final povRecord = records
-          .where((record) => record.isCharacter)
-          .where((record) => record.names.any(
-                (name) => name.trim().toLowerCase() == pov.toLowerCase(),
-              ))
-          .firstOrNull;
-      if (povRecord == null && !normalizedKnown.contains(pov.toLowerCase())) {
+      final povMatches = charactersNamed(pov, records);
+      final povRecord = povMatches.length == 1 ? povMatches.single : null;
+      // Two or more characters share that first name: the POV is someone this
+      // project holds, just not someone it can pick out, so it is not missing.
+      if (povMatches.isEmpty && !normalizedKnown.contains(pov.toLowerCase())) {
         findings.add(ManuscriptContinuityFinding(
           nodeId: scene.id,
           missingName: pov,
@@ -242,10 +240,11 @@ class ManuscriptContinuity {
 
     // 2. Unknown location.
     final location = scene.location.trim();
+    final bareKnown = {for (final name in normalizedKnown) bareName(name)};
     if (location.isNotEmpty &&
         location.length >= minimumMentionLength &&
         findings.length < maxFindingsPerScene &&
-        !normalizedKnown.contains(location.toLowerCase())) {
+        !bareKnown.contains(bareName(location))) {
       findings.add(ManuscriptContinuityFinding(
         nodeId: scene.id,
         missingName: location,
@@ -411,6 +410,49 @@ class ManuscriptContinuity {
           scene.timeLabel,
         ],
       ].where((part) => part.trim().isNotEmpty).join('\n');
+
+  /// The characters [name] refers to.
+  ///
+  /// A full name or alias picks out its character. Failing that, a first name
+  /// does — "Kali" for "Kali Vale" — because that is how a POV and most prose
+  /// name a character, and asking for the full name made Continuity report
+  /// Kali as missing and offer to create her twice. Every character sharing
+  /// the first name is returned, so a caller can tell "nobody" from "more than
+  /// one" and never guess between two people.
+  static List<ManuscriptKnownRecord> charactersNamed(
+    String name,
+    Iterable<ManuscriptKnownRecord> records,
+  ) {
+    final wanted = name.trim().toLowerCase();
+    if (wanted.isEmpty) return const [];
+    final characters = records.where((record) => record.isCharacter).toList();
+    final exact = [
+      for (final record in characters)
+        if (record.names.any((n) => n.trim().toLowerCase() == wanted)) record,
+    ];
+    if (exact.isNotEmpty) return exact;
+    return [
+      for (final record in characters)
+        if (firstNameOf(record.title).toLowerCase() == wanted) record,
+    ];
+  }
+
+  /// The first word of a multi-word [title], or empty for a single word.
+  ///
+  /// Empty for one word because a one-word title already is the name; there
+  /// is nothing shorter to answer to.
+  static String firstNameOf(String title) {
+    final words = title.trim().split(RegExp(r'\s+'));
+    return words.length < 2 ? '' : words.first;
+  }
+
+  /// [name] compared loosely: case, spacing and a leading "The" ignored, so a
+  /// scene set in "Docks" finds "The Docks" instead of offering a second one.
+  static String bareName(String name) => name
+      .trim()
+      .toLowerCase()
+      .replaceAll(RegExp(r'\s+'), ' ')
+      .replaceFirst(RegExp(r'^the '), '');
 
   /// Every title and alias that exists in the project, for missing-record
   /// checks. Accepts raw Universal Records so a name owned by another Studio
