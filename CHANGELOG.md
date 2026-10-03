@@ -12,6 +12,8 @@
   conditions `knowledgeConflict` and `ageConflict`.
   `scenesInReadingOrder` and `readingPosition` place a scene or a depicted
   event in reading order.
+- `readingPosition` places an event no scene depicts by its date, among
+  the depicted events of the same calendar and era; `compareStoryDates`.
 - `ConnectionTypeDefinition.isArchived`: an archived custom type is not
   offered for new links and still resolves for existing ones.
 

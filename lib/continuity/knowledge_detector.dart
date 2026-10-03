@@ -98,11 +98,18 @@ List<ManuscriptScene> scenesInReadingOrder(ProjectSurvey survey) {
 
 /// Where [id] — a scene, or an event a scene depicts — falls in reading
 /// order, or null when it cannot be placed.
+///
+/// An event no scene depicts is placed by its date: at the first scene
+/// that depicts an event on or after it in the same calendar — the reader
+/// learns of it there at the latest — or, when every depicted event is
+/// earlier, at the last scene that depicts one. Undated, it cannot be
+/// placed, and a fact learned in it shows throughout.
 int? Function(String id) readingPosition(ProjectSurvey survey) {
   final order = scenesInReadingOrder(survey);
   final index = {for (final (i, scene) in order.indexed) scene.id: i};
-  return (id) {
-    if (index[id] case final at?) return at;
+  final byId = {for (final record in survey.records) record.id: record};
+
+  int? depicted(String id) {
     int? earliest;
     for (final link in survey.linksOf(id)) {
       final String scene;
@@ -118,7 +125,52 @@ int? Function(String id) readingPosition(ProjectSurvey survey) {
       if (at != null && (earliest == null || at < earliest)) earliest = at;
     }
     return earliest;
+  }
+
+  TimelineDate? dateOf(String id) {
+    final date = timelineDateFrom(byId[id]?.fields['start']);
+    return date?.year == null ? null : date;
+  }
+
+  // Every depicted, dated event, read once.
+  final placed = <(TimelineDate, int)>[
+    for (final record in survey.records)
+      if (dateOf(record.id) case final date?)
+        if (depicted(record.id) case final at?) (date, at),
+  ];
+
+  return (id) {
+    if (index[id] case final at?) return at;
+    if (depicted(id) case final at?) return at;
+    final date = dateOf(id);
+    if (date == null) return null;
+    int? after;
+    int? before;
+    for (final (other, at) in placed) {
+      if (other.calendarId != date.calendarId || other.era != date.era) {
+        continue;
+      }
+      if (compareStoryDates(other, date) >= 0) {
+        if (after == null || at < after) after = at;
+      } else if (before == null || at > before) {
+        before = at;
+      }
+    }
+    return after ?? before;
   };
+}
+
+/// Two dates of one calendar and era, by year, then month, then day; a
+/// missing month or day counts as the start of the year or month.
+int compareStoryDates(TimelineDate a, TimelineDate b) {
+  for (final (x, y) in [
+    (a.year ?? 0, b.year ?? 0),
+    (a.month ?? 0, b.month ?? 0),
+    (a.day ?? 0, b.day ?? 0),
+  ]) {
+    if (x != y) return x.compareTo(y);
+  }
+  return 0;
 }
 
 Iterable<StructuralFinding> _namedBeforeLearned(ProjectSurvey survey,
