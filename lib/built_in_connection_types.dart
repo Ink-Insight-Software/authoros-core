@@ -358,6 +358,10 @@ class BuiltInConnectionTypes {
             'Believes',
             'Misunderstands',
             'Has Forgotten',
+            // October 3, 2026 (AOS-Write PLAN.md §3.47): a character who
+            // knows and says otherwise, and one who knows and keeps it.
+            'Lies About',
+            'Conceals',
           ],
         ),
         RecordFieldDefinition(
@@ -365,6 +369,17 @@ class BuiltInConnectionTypes {
           label: 'Private knowledge',
           type: RecordFieldType.boolean,
           order: 1,
+        ),
+        // Where they learned it: the scene, or the event, that tells them.
+        // `knowledge_ledger.dart` reads it to say who knows what *as of* a
+        // point in the book.
+        RecordFieldDefinition(
+          id: 'learnedIn',
+          label: 'Learned in',
+          type: RecordFieldType.recordReference,
+          order: 2,
+          referenceTypeIds: ['scene', ...TimelineRecordTypes.recordTypeIds],
+          description: 'The scene or event in which they learn it.',
         ),
       ],
     ),

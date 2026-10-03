@@ -2,6 +2,19 @@
 
 ## 0.6.0
 
+- **Knowledge tracking** (AOS-Write `PLAN.md` §3.47). New
+  `knowledge_ledger.dart`: `KnowledgeState`, `KnowledgeFact`,
+  `KnowledgeLedger` (read from `knows` links and the *Character knowledge*
+  table; `asOf` a reading position) and `sheetKnowledgeRows`. `knows` gains
+  *Lies About*, *Conceals* and a `learnedIn` metadata field.
+- Continuity: `detectKnowledgeConflicts` and `detectAgeConflicts`
+  (`continuity/knowledge_detector.dart`), run by `detectAll`, with the new
+  conditions `knowledgeConflict` and `ageConflict`.
+  `scenesInReadingOrder` and `readingPosition` place a scene or a depicted
+  event in reading order.
+- `ConnectionTypeDefinition.isArchived`: an archived custom type is not
+  offered for new links and still resolves for existing ones.
+
 - **The Calendar Bible: calendars that mean things as well as count them**
   (AOS-Write `PLAN.md` §3.45). New `calendar_bible.dart`, exported from
   `timeline_domain.dart`: `CalendarMonthLore` (symbol, meaning, season,

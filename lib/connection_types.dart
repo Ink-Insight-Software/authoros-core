@@ -81,6 +81,11 @@ class ConnectionTypeDefinition {
   final String? sourcePackId;
   final Map<String, Object?> extensionData;
 
+  /// Whether the author has retired this type. An archived type is never
+  /// offered for a new link, and still resolves for every link that already
+  /// uses it — Lock 6, deactivation hides and never deletes.
+  bool get isArchived => extensionData['archived'] == true;
+
   final Set<String>? _permittedSourceTypeIds;
   final Set<String>? _permittedTargetTypeIds;
 
