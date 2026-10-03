@@ -358,7 +358,7 @@ class BuiltInConnectionTypes {
             'Believes',
             'Misunderstands',
             'Has Forgotten',
-            // October 3, 2026 (AOS-Write PLAN.md §3.47): a character who
+            // October 3, 2026 (AOS-Write PLAN.md §3.52): a character who
             // knows and says otherwise, and one who knows and keeps it.
             'Lies About',
             'Conceals',
@@ -443,7 +443,7 @@ class BuiltInConnectionTypes {
       builtIn: true,
       sourcePackId: 'authoros-core',
       // Where an entry sits in a bible it is part of (`bible.dart`,
-      // AOS-Write PLAN.md §3.46). Optional, and meaningless on any other
+      // AOS-Write PLAN.md §3.51). Optional, and meaningless on any other
       // `partOf`, which carries none.
       metadataFields: [
         RecordFieldDefinition(

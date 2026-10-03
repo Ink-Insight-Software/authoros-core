@@ -1,5 +1,5 @@
 /// Who knows what, and how old they are, checked against the records
-/// (AOS-Write `PLAN.md` §3.47).
+/// (AOS-Write `PLAN.md` §3.52).
 ///
 /// Two conditions, each asked only where the author has said enough to
 /// answer it:

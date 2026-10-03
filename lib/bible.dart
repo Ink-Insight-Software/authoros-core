@@ -1,6 +1,6 @@
 /// The Codex Bible System: any deep bible — a magic system, a faction, a
 /// crime case, a romance, a government, a calendar — as one engine
-/// (AOS-Write `PLAN.md` §3.46).
+/// (AOS-Write `PLAN.md` §3.51).
 ///
 /// **Nothing here is a second record model.** A bible *type* is a
 /// project-scoped [RecordTypeDefinition], stored, synced and archived the way
