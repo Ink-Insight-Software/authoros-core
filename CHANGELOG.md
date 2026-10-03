@@ -1,5 +1,39 @@
 # Changelog
 
+## 0.6.0
+
+- **The Calendar Bible: calendars that mean things as well as count them**
+  (AOS-Write `PLAN.md` §3.45). New `calendar_bible.dart`, exported from
+  `timeline_domain.dart`: `CalendarMonthLore` (symbol, meaning, season,
+  associations, public belief, hidden truth, rituals, story meaning, plot
+  uses), `TimelineWeekday` (a day with what it is for),
+  `TimelineDateFormat`, `CalendarSpecialDate` (placed by month and day, or
+  told by timing), `CalendarSign` and `CalendarDetails` — the author's own
+  labelled details on any of them.
+- `TimelineCalendar` gains `weekdayDetails`, `dateFormats`,
+  `specialDates`, `signs` and `readingParts`; `weekdays`, `canCount`,
+  `weekdayOf`, `specialDatesOn`, `dateAt` (the inverse of `ordinal`),
+  `worldDayOf` / `dateAtWorldDay`, and `fromGregorian` / `toGregorian` by an
+  anchor in `conversionMetadata`. `convertTimelineDate` converts between
+  two calendars through a shared day count (`epoch.worldDay`).
+  `format(date, {template})` gains `{weekday}`, `{monthSymbol}` and
+  `{season}`, and collapses a missing weekday with its comma.
+- A month of length 0 is one not yet counted: dates in it name and write,
+  any day from 1 validates, and the calendar does not count days
+  (`canCount` is false).
+- `calendar-definition` declares the bible's fields in their own sections,
+  after the counting section, so older views read as they did.
+  `timelineCalendarFromRecord` reads them; a week stored as bare names
+  still reads.
+- Characters gain a **Birth reading** section (`birth.*`): a calendar, a
+  public and a true record, marked dates and reveal notes.
+- Continuity: `detectCalendarConflicts`, run by `detectAll`, reports the new
+  `StructuralCondition.calendarConflict` — a day the calendar does not have,
+  a festival on the wrong day, an event before a birth, a scene whose words
+  name another month.
+- `StoryClockLinks` moves here from AOS Write (`story_clock_links.dart`).
+- `AuthorRecord.copyWith` can change `extensionData`.
+
 ## 0.5.0
 
 - **The archive carries each scene's authorship record.** One optional entry,
