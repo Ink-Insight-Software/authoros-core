@@ -17,6 +17,14 @@
 ///    month and whose words name a different month or festival of the same
 ///    calendar and not its own. A notice, not a warning: a character may well
 ///    speak of another month, and only the author can tell which this is.
+///
+/// **Who owns which question.** A check is owned by what it reads. Questions
+/// 1, 2 and 4 read a calendar's months, an event's date and a character's
+/// birth date, all free. Question 3, and the festival half of 4, read a
+/// calendar's special dates, which the Calendar Bible Curio sells — and they
+/// ask nothing where no special date has been written, so an account without
+/// the Curio meets them only over what it already wrote, which is never
+/// withheld. Nothing here asks what anyone owns.
 library;
 
 import 'dart:convert';

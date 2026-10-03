@@ -249,6 +249,18 @@ const _companionAppearanceFields = <String>{
   'appearance.sensoryTraits',
 };
 
+/// The birth reading's astrology — the Calendar Bible Curio's, decided
+/// October 3, 2026. The calendar a character is born under and both birth
+/// dates are basic character facts and stay free; the readings drawn from the
+/// calendar's signs, the dates marked by them and when the truth comes out
+/// are what the Curio sells.
+const _calendarBibleBirthFields = <String>{
+  'birth.publicReading',
+  'birth.trueReading',
+  'birth.markedDates',
+  'birth.revealNotes',
+};
+
 /// The capability that sells a field, or null when it is free.
 ///
 /// Null for everything outside the rule above, which is most of the sheet —
@@ -259,6 +271,7 @@ String? _soldWith(String id) {
   final section = id.split('.').first;
   if (_companionSections.contains(section)) return 'characters.specialist';
   if (_companionAppearanceFields.contains(id)) return 'characters.specialist';
+  if (_calendarBibleBirthFields.contains(id)) return 'calendars.astrology';
   return null;
 }
 

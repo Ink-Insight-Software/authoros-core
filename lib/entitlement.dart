@@ -170,7 +170,23 @@ enum PaidProduct {
   /// title and author profile metadata. It has no checkout slug because it is
   /// claimed for free, but ADR-0015 still requires the build to name what it
   /// can deliver.
-  bookplateMaker;
+  bookplateMaker,
+
+  /// The Calendar Bible — the depth over a world's calendar: the lore of its
+  /// months and days and the calendar itself, its astrology and the birth
+  /// readings drawn from it, and its festivals and holy days. A paid Curio.
+  ///
+  /// **The calendar itself is not this, and never becomes it.** Months, their
+  /// lengths, the week, eras, the epoch, date formats, conversion, story dates
+  /// on the timeline and in the manuscript, and the continuity checks that
+  /// read them stay AuthorOS Write's and free. What is sold is the lore over
+  /// that structure — the line the constitution's first Curio drew, moved by
+  /// the owner on October 3, 2026 from the whole builder to the depth alone.
+  ///
+  /// Shut until `curio_products` carries a `curio-calendar-bible` row with a
+  /// live Stripe price. An author who already wrote lore keeps it: a field
+  /// with a stored value is never withheld.
+  calendarBible;
 
   /// The wire name, fixed independently of the Dart identifier.
   String get id => switch (this) {
@@ -184,6 +200,7 @@ enum PaidProduct {
         PaidProduct.aosCompanion => 'aos-companion',
         PaidProduct.aosCommonRoom => 'aos-common-room',
         PaidProduct.bookplateMaker => 'curio-bookplate-maker',
+        PaidProduct.calendarBible => 'curio-calendar-bible',
       };
 
   /// Whether this was once sold and is not offered any more.
@@ -220,7 +237,9 @@ enum PaidProduct {
         // third time this switch has been the one to remember. Not yet on
         // sale, which is still not retired.
         PaidProduct.aosCommonRoom ||
-        PaidProduct.bookplateMaker =>
+        PaidProduct.bookplateMaker ||
+        // Added October 3, 2026, with the value. On sale, not retired.
+        PaidProduct.calendarBible =>
           false,
       };
 
@@ -253,7 +272,8 @@ enum PaidProduct {
         PaidProduct.aosPress ||
         PaidProduct.aosHeartsAndTensions ||
         PaidProduct.aosCompanion ||
-        PaidProduct.aosCommonRoom =>
+        PaidProduct.aosCommonRoom ||
+        PaidProduct.calendarBible =>
           false,
         PaidProduct.bookplateMaker => true,
       };

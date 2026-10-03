@@ -31,6 +31,13 @@
   `StructuralCondition.calendarConflict` — a day the calendar does not have,
   a festival on the wrong day, an event before a birth, a scene whose words
   name another month.
+- **`PaidProduct.calendarBible`** (`curio-calendar-bible`), a paid Curio:
+  the calendar's lore, astrology and festivals. Eleven `calendar-definition`
+  fields and four `birth.*` fields carry `soldWith` (`calendars.lore`,
+  `calendars.astrology`, `calendars.festivals`); the months, week, eras,
+  epoch, formats, conversion and both birth dates stay unmarked and free.
+- `detectCalendarConflicts` matches names with `mentionsName`, the one
+  definition of a mention.
 - `StoryClockLinks` moves here from AOS Write (`story_clock_links.dart`).
 - `AuthorRecord.copyWith` can change `extensionData`.
 
