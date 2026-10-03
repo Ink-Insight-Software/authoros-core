@@ -73,7 +73,12 @@ class ProjectSurvey {
         projectId: projectId,
         projectTitle: projectTitle,
         manuscript: manuscript,
-        records: records,
+        // Notes about a character are not part of the story the survey reads:
+        // not cast, not names to look for in the prose, not records to count.
+        records: [
+          for (final record in records)
+            if (!characterNotesTypeIds.contains(record.typeId)) record,
+        ],
         links: links,
         categoryByTypeId: {
           for (final definition in typeDefinitions)
@@ -203,6 +208,17 @@ class ProjectSurvey {
   /// Every scene's prose, concatenated — for "is this name anywhere in the
   /// book at all?" questions that do not care which scene.
   late final String allProse = _scenes.map(proseOfScene).join('\n');
+
+  /// Every scene's prose as written, capitals and all. Only for the question
+  /// case answers: whether a word that could be a name is written as one.
+  late final String allProseAsWritten = _scenes
+      .map((scene) => [
+            scene.title,
+            scene.content,
+            scene.notes,
+            scene.timeLabel,
+          ].join('\n'))
+      .join('\n');
 
   /// The mentions the author has dismissed, keyed by [MentionDismissal.keyFor].
   ///

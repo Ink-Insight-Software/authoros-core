@@ -44,6 +44,7 @@ library;
 import 'character_interrogation.dart';
 import 'connected_domain.dart';
 import 'record_types.dart';
+import 'story_vocabulary.dart';
 
 /// The id of the record type an interrogation session persists as.
 const String kInterrogationSessionTypeId = 'interrogation-session';
@@ -258,7 +259,9 @@ class InterrogationRecordTypes {
         'One conversation with a character: what was asked, what kind of '
         'answer came back, and where it came from.',
     icon: 'forum',
-    categoryId: 'characters',
+    // Not 'characters': a session is a note about a character, not one.
+    // See [characterNotesCategoryId].
+    categoryId: characterNotesCategoryId,
     baseTypeId: 'general-lore',
     fields: [
       RecordFieldDefinition(
@@ -316,6 +319,7 @@ class InterrogationRecordTypes {
     sourcePackId: 'authoros-character-core',
     permissions: {'editableDefinition': false},
     exportBehavior: {'includeStructuredFields': true},
-    extensionData: {'interrogation': true},
+    // Never a template: a session exists because a conversation happened.
+    extensionData: {'interrogation': true, 'selectableForNewRecords': false},
   );
 }

@@ -236,7 +236,8 @@ class StructuralFinding {
     required this.recommendation,
     required this.entityIds,
     this.action,
-  });
+    ContinuityDestination? destination,
+  }) : _destination = destination;
 
   final StructuralCondition condition;
 
@@ -261,7 +262,12 @@ class StructuralFinding {
   /// Set only where an existing continuity action already fits.
   final StructuralAction? action;
 
-  ContinuityDestination get destination => condition.destination;
+  /// Where *Open Studio* goes: the condition's Studio, unless the finding
+  /// knows better. An unlinked mention can name a place as well as a person,
+  /// and a place belongs to the World, not to Characters.
+  ContinuityDestination get destination =>
+      _destination ?? condition.destination;
+  final ContinuityDestination? _destination;
 }
 
 /// Every finding in one project, grouped and counted.

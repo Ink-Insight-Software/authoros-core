@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.6.0
+## 0.8.0
 
 - **Knowledge tracking** (AOS-Write `PLAN.md` §3.47). New
   `knowledge_ledger.dart`: `KnowledgeState`, `KnowledgeFact`,
@@ -65,6 +65,51 @@
   `StructuralCondition.bibleRule`. `characterBirthDate` is public for it.
 - `StoryClockLinks` moves here from AOS Write (`story_clock_links.dart`).
 - `AuthorRecord.copyWith` can change `extensionData`.
+
+## 0.7.0
+
+Continuity reports what is really in the manuscript. Each item below was a
+finding it got wrong on an ordinary project.
+
+- **A character answers to their first name.** `ManuscriptContinuity.charactersNamed`
+  matches a full name or alias, then a first name. A POV of "Kali" is Kali
+  Vale, not a missing character with a *Create "Kali"* that made a duplicate.
+  A first name two characters share is not reported as missing. The orphan
+  check counts a unique first name written capitalised, so "Will" in prose
+  is Will Turner and "will" is not; `ProjectSurvey.allProseAsWritten` keeps
+  the capitals for that one question.
+- **A location ignores case, spacing and a leading "The"** (`bareName`). A
+  scene set in "Docks" finds The Docks instead of offering to create a second
+  one.
+- **A world entity named in the prose but not connected is reported once**,
+  as an unlinked mention with *Connect*, and no longer also as unused
+  worldbuilding. Its *Open Studio* goes to the Studio that owns the record:
+  `StructuralFinding` takes an optional `destination`.
+- **A plotline connected to its chapter has scenes.** It was reported as
+  empty, unlike every other check, which reads a chapter as covering its
+  scenes.
+- **Relationship notices are quieter.** Only arcs marked *active* are open;
+  planned, unset and abandoned are not reported. Only links of a kind that
+  changes (enemy, rival, partner, ally, mentor) want an arc, not `knows`,
+  family or friendship. Each kind folds into one notice however many there
+  are.
+
+## 0.6.0
+
+- **Character Chat sessions are character notes, not characters.**
+  `character-chat-session` and `interrogation-session` move from the
+  `characters` category to the new `characterNotesCategoryId`
+  (`'character-notes'`) in `story_vocabulary.dart`. Everything that read the
+  cast by category took them for characters: Continuity reported an interview
+  ("Fears & Secrets — Vincenzo") as a character who never appears in the
+  manuscript. `characterNotesTypeIds` names the two types for surfaces that
+  list every record rather than selecting by category.
+- Both session types declare `selectableForNewRecords: false`, so a
+  template picker no longer offers them as something to create.
+- `ProjectSurvey.from` leaves character notes out of the records it reads, so
+  no detector or provocation counts an interview as part of the story.
+- No stored data changes. A record's category comes from its type, and both
+  applications find sessions by type id, not category.
 
 ## 0.5.0
 

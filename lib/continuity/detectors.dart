@@ -77,6 +77,7 @@ List<StructuralFinding> detectOrphanEntities(ProjectSurvey survey) {
   if (!survey.hasManuscript) return const [];
   final findings = <StructuralFinding>[];
   final prose = survey.allProse;
+  final firstNames = _uniqueFirstNames(survey.characters);
 
   for (final character in survey.characters) {
     if (survey.reachesManuscript(
@@ -86,6 +87,13 @@ List<StructuralFinding> detectOrphanEntities(ProjectSurvey survey) {
       continue;
     }
     if (_namesOf(character).any((name) => mentionsName(prose, name))) continue;
+    // Prose calls Kali Vale "Kali". Without this she was reported as never
+    // appearing in a book she is in on every page.
+    final firstName = firstNames[character.id];
+    if (firstName != null &&
+        _writtenAsName(survey.allProseAsWritten, firstName)) {
+      continue;
+    }
 
     findings.add(StructuralFinding(
       condition: StructuralCondition.orphanEntity,
@@ -101,6 +109,32 @@ List<StructuralFinding> detectOrphanEntities(ProjectSurvey survey) {
   }
   return findings;
 }
+
+/// Each character's first name, where no other character shares it.
+///
+/// A shared first name picks out nobody, so it answers for nobody.
+Map<String, String> _uniqueFirstNames(List<AuthorRecord> characters) {
+  final counts = <String, int>{};
+  for (final character in characters) {
+    final first = ManuscriptContinuity.firstNameOf(character.title);
+    if (first.length < 2) continue;
+    counts.update(first.toLowerCase(), (n) => n + 1, ifAbsent: () => 1);
+  }
+  final result = <String, String>{};
+  for (final character in characters) {
+    final first = ManuscriptContinuity.firstNameOf(character.title);
+    if (counts[first.toLowerCase()] == 1) result[character.id] = first;
+  }
+  return result;
+}
+
+/// Whether [name] is written in [prose] as a name: capitalised, whole word.
+///
+/// Case matters here and nowhere else in this file, because a first name is
+/// often a word too — "Will", "Rose", "Hope" — and only the capital says which.
+bool _writtenAsName(String prose, String name) =>
+    RegExp('(^|[^A-Za-z0-9])${RegExp.escape(name)}(?![A-Za-z0-9])')
+        .hasMatch(prose);
 
 /// A record's title plus any aliases, long enough to match on.
 List<String> _namesOf(AuthorRecord record) => [
@@ -181,6 +215,7 @@ List<StructuralFinding> detectManuscriptGaps(ProjectSurvey survey) {
             recommendation: 'Connect ${target.title} to this chapter so the '
                 'rest of AuthorOS knows they are in it.',
             entityIds: [target.id, chapter.id],
+            destination: _studioOf(survey, target),
             action: StructuralAction.link(
               issue: issue,
               sourceId: target.id,
@@ -244,7 +279,11 @@ List<StructuralFinding> detectOrphanPlots(ProjectSurvey survey) {
     final connectsToAScene = survey.linksOf(plot.id).any((link) {
       if (!plotSceneConnectionTypeIds.contains(link.typeId)) return false;
       final other = link.sourceId == plot.id ? link.targetId : link.sourceId;
-      return survey.sceneNodeIds.contains(other);
+      // A chapter counts as well as a scene. A storyline connected to the
+      // chapter that carries it has scenes; reporting it as empty disagreed
+      // with every other check here, which reads the chapter as covering its
+      // scenes.
+      return survey.isLiveManuscriptNode(other);
     });
     if (connectsToAScene) continue;
 
@@ -268,40 +307,52 @@ List<StructuralFinding> detectOrphanPlots(ProjectSurvey survey) {
 
 /// Relationships the author established and never closed.
 ///
-/// Two shapes, and they are genuinely different:
+/// Two shapes, each folded into one notice however many there are:
 ///
-/// * A `relationship-arc` record that Plot Studio does not consider resolved —
-///   the author said this relationship has a shape, and never gave it an
-///   ending. "Resolved" is read off the same `plotStatus` field
-///   `PlotService` uses, so the two screens cannot disagree.
-/// * A relationship *link* between two characters with no relationship arc
-///   anywhere near either end — the relationship exists as a fact and has no
-///   trajectory at all.
+/// * `relationship-arc` records Plot Studio marks **active** — begun and not
+///   yet ended. Status is read off the same `plotStatus` field `PlotService`
+///   uses, so the two screens cannot disagree.
+/// * Links between two characters of a kind that changes — rivals, enemies,
+///   partners, allies, mentors — with no relationship arc near either end.
+///
+/// Both used to be one notice per arc and per pair, from the moment either
+/// existed, which made a large cast read as a wall of the unfinished.
 List<StructuralFinding> detectUnresolvedRelationships(ProjectSurvey survey) {
   final findings = <StructuralFinding>[];
+  final arcs = survey.recordsOfTypes(const {'relationship-arc'});
 
-  for (final arc in survey.recordsOfTypes(const {'relationship-arc'})) {
-    if (_isResolved(arc)) continue;
+  // Only arcs the author has marked active. One that is planned, or has no
+  // status yet, has not started; one abandoned has been ended, which is an
+  // ending. Reporting every arc from the moment it was made turned a drafting
+  // aid into a list of everything not yet finished.
+  final open = [
+    for (final arc in arcs)
+      if (_plotStatusOf(arc) == 'active') arc,
+  ];
+  if (open.isNotEmpty) {
     findings.add(StructuralFinding(
       condition: StructuralCondition.unresolvedRelationship,
       severity: ContinuitySeverity.notice,
-      title: '${arc.title} has no resolution',
-      detail: 'The arc is still open: its status is '
-          '"${_plotStatusOf(arc).isEmpty ? 'unset' : _plotStatusOf(arc)}".',
-      recommendation: 'Give ${arc.title} an ending, or mark it resolved if the '
-          'manuscript already provides one.',
-      entityIds: [arc.id],
+      title: open.length == 1
+          ? '${open.single.title} is still open'
+          : '${open.length} relationship arcs are still open',
+      detail:
+          'Active and not yet resolved: ${_sample(open.map((a) => a.title))}.',
+      recommendation: 'When the manuscript gives them an ending, mark them '
+          'resolved in Plot Studio.',
+      entityIds: [for (final arc in open) arc.id],
     ));
   }
 
   final arcSubjects = <String>{
-    for (final arc in survey.recordsOfTypes(const {'relationship-arc'}))
-      ...survey.connectedIds(arc.id),
+    for (final arc in arcs) ...survey.connectedIds(arc.id),
   };
 
+  final pairs = <String>[];
+  final pairIds = <String>{};
   final reported = <String>{};
   for (final link in survey.links) {
-    if (!relationshipConnectionTypeIds.contains(link.typeId)) continue;
+    if (!_changingRelationshipTypeIds.contains(link.typeId)) continue;
     final source = survey.recordById(link.sourceId);
     final target = survey.recordById(link.targetId);
     if (source == null || target == null) continue;
@@ -312,32 +363,52 @@ List<StructuralFinding> detectUnresolvedRelationships(ProjectSurvey survey) {
     if (arcSubjects.contains(source.id) || arcSubjects.contains(target.id)) {
       continue;
     }
-    // One finding per pair, whichever direction the link runs.
+    // One mention per pair, whichever direction the link runs.
     final pair = ([source.id, target.id]..sort()).join('|');
     if (!reported.add(pair)) continue;
-
+    pairs.add('${source.title} and ${target.title}');
+    pairIds.addAll([source.id, target.id]);
+  }
+  if (pairs.isNotEmpty) {
     findings.add(StructuralFinding(
       condition: StructuralCondition.unresolvedRelationship,
       severity: ContinuitySeverity.notice,
-      title: '${source.title} and ${target.title} have no arc',
-      detail: 'They are connected as "${link.typeId}", and no relationship arc '
-          'tracks where that goes.',
-      recommendation: 'Create a relationship arc if this pairing should change '
-          'across the book, or leave it as a standing fact.',
-      entityIds: [source.id, target.id],
+      title: pairs.length == 1
+          ? '${pairs.single} have no arc'
+          : '${pairs.length} relationships have no arc',
+      detail: 'Rivals, enemies, partners, allies or mentors with nothing '
+          'tracking where it goes: ${_sample(pairs)}.',
+      recommendation: 'Create a relationship arc for any pairing that should '
+          'change across the book, or leave it as a standing fact.',
+      entityIds: pairIds.toList(),
     ));
   }
   return findings;
 }
 
+/// Relationships whose nature is to change: the ones worth an arc.
+///
+/// `knows`, family ties and friendship are left out. They are usually
+/// standing facts, and reporting every pair that knows each other buried the
+/// pairings that do need a trajectory.
+const _changingRelationshipTypeIds = <String>{
+  'enemyOf',
+  'rivalOf',
+  'partnerOf',
+  'alliedWith',
+  'mentors',
+};
+
+/// The first three of [names], and how many more.
+String _sample(Iterable<String> names) {
+  final all = names.toList();
+  if (all.length <= 3) return all.join(', ');
+  return '${all.take(3).join(', ')} and ${all.length - 3} more';
+}
+
 String _plotStatusOf(AuthorRecord record) =>
     '${record.fields['plotStatus'] ?? ''}'.toLowerCase();
 
-/// Plot Studio's own definition of resolved — see `PlotService._isResolved`.
-bool _isResolved(AuthorRecord record) {
-  final status = _plotStatusOf(record);
-  return status == 'resolved' || status == 'completed';
-}
 
 // ---------------------------------------------------------------------------
 // 5. Timeline conflict
@@ -573,8 +644,33 @@ List<StructuralFinding> detectUnusedWorldbuilding(ProjectSurvey survey) {
   ];
 }
 
-/// The worldbuilding records with no connection to a live scene or chapter.
-List<AuthorRecord> unusedWorldEntities(ProjectSurvey survey) => [
-      for (final record in survey.worldEntities)
-        if (!survey.reachesManuscript(record.id)) record,
-    ];
+/// The worldbuilding records that never reach the manuscript.
+///
+/// Neither connected to a live scene or chapter nor named in the prose. One
+/// that is named but not connected is an unlinked mention, reported with a
+/// *Connect* that fixes it; counting it here as well said the same thing
+/// twice, once with nothing to press.
+List<AuthorRecord> unusedWorldEntities(ProjectSurvey survey) {
+  final prose = survey.allProse;
+  return [
+    for (final record in survey.worldEntities)
+      if (!survey.reachesManuscript(record.id) &&
+          !_namesOf(record).any((name) => mentionsName(prose, name)))
+        record,
+  ];
+}
+
+/// The Studio that owns [record], read from its category.
+ContinuityDestination _studioOf(ProjectSurvey survey, AuthorRecord record) {
+  final category = survey.categoryFor(record.typeId);
+  if (category == characterCategoryId) return ContinuityDestination.characters;
+  if (worldbuildingCategoryIds.contains(category)) {
+    return ContinuityDestination.world;
+  }
+  return switch (category) {
+    'plot' => ContinuityDestination.plot,
+    'timeline' => ContinuityDestination.timeline,
+    'research' => ContinuityDestination.research,
+    _ => ContinuityDestination.characters,
+  };
+}

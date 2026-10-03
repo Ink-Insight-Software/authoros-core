@@ -43,6 +43,29 @@ const worldbuildingCategoryIds = <String>{
 /// The category every character record type belongs to.
 const characterCategoryId = 'characters';
 
+/// The category of records that annotate a character and belong on its page
+/// alone: a Character Chat interview, a conversation with the character.
+///
+/// They were filed under [characterCategoryId], and everything that selects
+/// characters by category took them for characters. Continuity reported
+/// "Fears & Secrets — Vincenzo never appears in the manuscript", and the same
+/// rule fed them to every other cast reader. A session is a note *about* a
+/// character, made on that character's page, and nothing past that page has a
+/// use for it.
+const characterNotesCategoryId = 'character-notes';
+
+/// The record types in [characterNotesCategoryId].
+///
+/// For a surface that lists every record a project holds rather than selecting
+/// by category — search, the Story Codex, the graph — so it can leave these
+/// out the way it leaves out `CodexInfrastructureTypes.all`. Literal ids, as
+/// this file imports nothing: they are `kCharacterChatSessionTypeId` and
+/// `kInterrogationSessionTypeId`, and AOS-Write's tests hold the two in step.
+const characterNotesTypeIds = <String>{
+  'character-chat-session',
+  'interrogation-session',
+};
+
 /// The connection types that mean "this record reaches the manuscript".
 const manuscriptConnectionTypeIds = <String>{'appearsIn', 'mentionedIn'};
 
