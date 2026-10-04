@@ -190,18 +190,18 @@ enum PaidProduct {
 
   /// AOS Casebook — sold as its own application, and since October 3, 2026
   /// in AuthorOS Write as well, by the owner's decision (AOS-Write
-  /// `PLAN.md` §3.51). In Write it opens the crime case bible. One wire id
+  /// `PLAN.md` §3.56). In Write it opens the crime case bible. One wire id
   /// in both, so a purchase in either is honoured by the other.
   aosCasebook,
 
   /// AOS Lorekeeper — deep lore. In Write it opens the magic and mythology
-  /// bibles (`PLAN.md` §3.51). The Archive, canon status and the
+  /// bibles (`PLAN.md` §3.56). The Archive, canon status and the
   /// canon-conflict engine stay free, as the Lorekeeper map found they must.
   aosLorekeeper,
 
   /// Codex Bibles — the upgrade over the free bibles: the custom bible
   /// builder, author-written rules, hidden truths, bible export, and the
-  /// political system bible (`PLAN.md` §3.51). The free bibles — blank,
+  /// political system bible (`PLAN.md` §3.56). The free bibles — blank,
   /// faction, creature, calendar — and their pages and entries never need it.
   aosCodexBibles;
 

@@ -62,21 +62,21 @@ enum StructuralCondition {
 
   /// A date the world's own calendar says cannot be right: a day it does not
   /// have, a festival on the wrong day, an event before a birth, a scene
-  /// whose words name another month (AOS-Write PLAN.md §3.50).
+  /// whose words name another month (AOS-Write PLAN.md §3.55).
   calendarConflict,
 
   /// A rule the author wrote in one of their bibles that a record breaks —
   /// *every House has a sigil*, *a throne has one ruler* (AOS-Write PLAN.md
-  /// §3.51).
+  /// §3.56).
   bibleRule,
 
   /// Who knows what: the sheet and the graph contradicting each other, or a
   /// subject named in a scene before the character learns it (AOS-Write
-  /// PLAN.md §3.52).
+  /// PLAN.md §3.57).
   knowledgeConflict,
 
   /// Ages that cannot be: a parent too young for their child, or a stated age
-  /// none of a character's dated events would give them (§3.52).
+  /// none of a character's dated events would give them (§3.57).
   ageConflict,
 }
 

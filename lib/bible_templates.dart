@@ -1,4 +1,4 @@
-/// The starter bibles (AOS-Write `PLAN.md` §3.51).
+/// The starter bibles (AOS-Write `PLAN.md` §3.56).
 ///
 /// A template is a starting point and nothing more: choosing one writes a
 /// project-scoped bible type the author then owns and may reshape freely —
@@ -48,7 +48,7 @@ class BibleTemplate {
 
   /// The capability that sells this template, or null for a free one —
   /// the same marker a field carries (`RecordFieldDefinition.soldWith`),
-  /// resolved the same way. AOS-Write `PLAN.md` §3.51 has the line.
+  /// resolved the same way. AOS-Write `PLAN.md` §3.56 has the line.
   final String? soldWith;
 
   final String id;
