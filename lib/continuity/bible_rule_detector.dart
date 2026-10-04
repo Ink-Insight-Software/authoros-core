@@ -1,5 +1,5 @@
 /// The rules an author wrote about their world, checked against the records
-/// (AOS-Write `PLAN.md` §3.56).
+/// (AOS-Write `PLAN.md` §3.58).
 ///
 /// A rule lives on the bible that states it (`BibleRules`, `_bible.rules`)
 /// and speaks in the records' own terms — a type, a field, a value, a link —
