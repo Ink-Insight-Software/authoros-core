@@ -1,5 +1,5 @@
 /// Public record and hidden truth, for any field of any record
-/// (AOS-Write `PLAN.md` §3.56).
+/// (AOS-Write `PLAN.md` §3.58).
 ///
 /// A world whose official records lie needs two values where a form has one:
 /// what the registry says, and what happened. The field holds the public
