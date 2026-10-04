@@ -1,4 +1,4 @@
-/// Who knows what, and since when (AOS-Write `PLAN.md` §3.52).
+/// Who knows what, and since when (AOS-Write `PLAN.md` §3.57).
 ///
 /// Read, never stored: the facts are the `knows` links a character holds —
 /// with their state, their private flag and the scene or event they were

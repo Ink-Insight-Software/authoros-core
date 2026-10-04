@@ -2,7 +2,7 @@
 
 ## 0.8.0
 
-- **Knowledge tracking** (AOS-Write `PLAN.md` §3.52). New
+- **Knowledge tracking** (AOS-Write `PLAN.md` §3.57). New
   `knowledge_ledger.dart`: `KnowledgeState`, `KnowledgeFact`,
   `KnowledgeLedger` (read from `knows` links and the *Character knowledge*
   table; `asOf` a reading position) and `sheetKnowledgeRows`. `knows` gains
@@ -18,7 +18,7 @@
   offered for new links and still resolves for existing ones.
 
 - **The Calendar Bible: calendars that mean things as well as count them**
-  (AOS-Write `PLAN.md` §3.50). New `calendar_bible.dart`, exported from
+  (AOS-Write `PLAN.md` §3.55). New `calendar_bible.dart`, exported from
   `timeline_domain.dart`: `CalendarMonthLore` (symbol, meaning, season,
   associations, public belief, hidden truth, rituals, story meaning, plot
   uses), `TimelineWeekday` (a day with what it is for),
@@ -53,7 +53,7 @@
   epoch, formats, conversion and both birth dates stay unmarked and free.
 - `detectCalendarConflicts` matches names with `mentionsName`, the one
   definition of a mention.
-- **The Codex Bible System** (AOS-Write `PLAN.md` §3.51). `bible.dart`: a
+- **The Codex Bible System** (AOS-Write `PLAN.md` §3.56). `bible.dart`: a
   bible type is a project-scoped record type with entry sections in
   `extensionData['bible']` (`BibleTypes`, `BibleEntrySection`); entries join
   their bible by `partOf`, whose metadata declares `bibleSection`; rules an

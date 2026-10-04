@@ -1,5 +1,5 @@
 /// Dates that the world's own calendar says cannot be right (AOS-Write
-/// PLAN.md §3.50).
+/// PLAN.md §3.55).
 ///
 /// Four questions the Calendar Bible makes answerable, each asked only where
 /// the author has given the calendar enough to answer it, and each silent
