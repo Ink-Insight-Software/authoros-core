@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.9.0
+
+- **Five files AOS Companion's engine needs, moved in from AOS-Write.** All
+  small, pure Dart, and each used elsewhere in AOS-Write, so the core is where
+  they belong: `procedural/generation_seed.dart` (the one seeded generator),
+  `record_completeness.dart`, `canon_facts.dart`,
+  `revision_decision_subject.dart` and `checkout_link.dart`. Moved unchanged.
+  AOS-Write replaces its copies with one-line exports when it moves its pin
+  past this release. Additive: nothing existing changes.
+
 ## 0.8.0
 
 - **Knowledge tracking** (AOS-Write `PLAN.md` §3.59). New
