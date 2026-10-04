@@ -5,7 +5,7 @@ description: >-
   Dart. AuthorOS Write and the standalone applications depend on it; none of
   them copies it.
 publish_to: none
-version: 0.7.0
+version: 0.8.0
 
 environment:
   sdk: ">=3.6.0 <4.0.0"

@@ -170,7 +170,40 @@ enum PaidProduct {
   /// title and author profile metadata. It has no checkout slug because it is
   /// claimed for free, but ADR-0015 still requires the build to name what it
   /// can deliver.
-  bookplateMaker;
+  bookplateMaker,
+
+  /// The Calendar Bible — the depth over a world's calendar: the lore of its
+  /// months and days and the calendar itself, its astrology and the birth
+  /// readings drawn from it, and its festivals and holy days. A paid Curio.
+  ///
+  /// **The calendar itself is not this, and never becomes it.** Months, their
+  /// lengths, the week, eras, the epoch, date formats, conversion, story dates
+  /// on the timeline and in the manuscript, and the continuity checks that
+  /// read them stay AuthorOS Write's and free. What is sold is the lore over
+  /// that structure — the line the constitution's first Curio drew, moved by
+  /// the owner on October 3, 2026 from the whole builder to the depth alone.
+  ///
+  /// Shut until `curio_products` carries a `curio-calendar-bible` row with a
+  /// live Stripe price. An author who already wrote lore keeps it: a field
+  /// with a stored value is never withheld.
+  calendarBible,
+
+  /// AOS Casebook — sold as its own application, and since October 3, 2026
+  /// in AuthorOS Write as well, by the owner's decision (AOS-Write
+  /// `PLAN.md` §3.51). In Write it opens the crime case bible. One wire id
+  /// in both, so a purchase in either is honoured by the other.
+  aosCasebook,
+
+  /// AOS Lorekeeper — deep lore. In Write it opens the magic and mythology
+  /// bibles (`PLAN.md` §3.51). The Archive, canon status and the
+  /// canon-conflict engine stay free, as the Lorekeeper map found they must.
+  aosLorekeeper,
+
+  /// Codex Bibles — the upgrade over the free bibles: the custom bible
+  /// builder, author-written rules, hidden truths, bible export, and the
+  /// political system bible (`PLAN.md` §3.51). The free bibles — blank,
+  /// faction, creature, calendar — and their pages and entries never need it.
+  aosCodexBibles;
 
   /// The wire name, fixed independently of the Dart identifier.
   String get id => switch (this) {
@@ -184,6 +217,10 @@ enum PaidProduct {
         PaidProduct.aosCompanion => 'aos-companion',
         PaidProduct.aosCommonRoom => 'aos-common-room',
         PaidProduct.bookplateMaker => 'curio-bookplate-maker',
+        PaidProduct.calendarBible => 'curio-calendar-bible',
+        PaidProduct.aosCasebook => 'aos-casebook',
+        PaidProduct.aosLorekeeper => 'aos-lorekeeper',
+        PaidProduct.aosCodexBibles => 'aos-codex-bibles',
       };
 
   /// Whether this was once sold and is not offered any more.
@@ -220,7 +257,12 @@ enum PaidProduct {
         // third time this switch has been the one to remember. Not yet on
         // sale, which is still not retired.
         PaidProduct.aosCommonRoom ||
-        PaidProduct.bookplateMaker =>
+        PaidProduct.bookplateMaker ||
+        // Added October 3, 2026, with the value. On sale, not retired.
+        PaidProduct.calendarBible ||
+        PaidProduct.aosCasebook ||
+        PaidProduct.aosLorekeeper ||
+        PaidProduct.aosCodexBibles =>
           false,
       };
 
@@ -253,7 +295,11 @@ enum PaidProduct {
         PaidProduct.aosPress ||
         PaidProduct.aosHeartsAndTensions ||
         PaidProduct.aosCompanion ||
-        PaidProduct.aosCommonRoom =>
+        PaidProduct.aosCommonRoom ||
+        PaidProduct.calendarBible ||
+        PaidProduct.aosCasebook ||
+        PaidProduct.aosLorekeeper ||
+        PaidProduct.aosCodexBibles =>
           false,
         PaidProduct.bookplateMaker => true,
       };

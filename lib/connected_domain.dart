@@ -77,6 +77,7 @@ class AuthorRecord {
     Map<String, Object?>? fields,
     List<String>? tags,
     DateTime? updatedAt,
+    Map<String, Object?>? extensionData,
   }) =>
       AuthorRecord(
         id: id,
@@ -98,7 +99,7 @@ class AuthorRecord {
         tags: tags ?? this.tags,
         createdAt: createdAt,
         updatedAt: updatedAt ?? this.updatedAt,
-        extensionData: extensionData,
+        extensionData: extensionData ?? this.extensionData,
       );
 
   Map<String, Object?> toJson() => {

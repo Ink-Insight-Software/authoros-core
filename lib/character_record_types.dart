@@ -46,7 +46,7 @@ class CharacterRecordTypes {
   /// The built-in character templates.
   ///
   /// **Two of these narrow the sheet and ten do not.** `character-basic` shows
-  /// four sections of twenty-four and `character-supporting` shows eight; the
+  /// four sections of twenty-five and `character-supporting` shows eight; the
   /// other ten declare no `visibleSections` and resolve to the whole sheet, so
   /// they are identical in behaviour and differ only in the name stored on the
   /// record.
@@ -62,7 +62,7 @@ class CharacterRecordTypes {
       'Basic Character',
       visibleSections: const ['identity', 'appearance', 'personality', 'notes'],
       describe: 'Identity, appearance, personality and notes — four sections '
-          'of twenty-four. The short sheet, for a character you want on the '
+          'of twenty-five. The short sheet, for a character you want on the '
           'page before you know much about them.',
     ),
     _template('character-main', 'Main Character',
@@ -249,6 +249,18 @@ const _companionAppearanceFields = <String>{
   'appearance.sensoryTraits',
 };
 
+/// The birth reading's astrology — the Calendar Bible Curio's, decided
+/// October 3, 2026. The calendar a character is born under and both birth
+/// dates are basic character facts and stay free; the readings drawn from the
+/// calendar's signs, the dates marked by them and when the truth comes out
+/// are what the Curio sells.
+const _calendarBibleBirthFields = <String>{
+  'birth.publicReading',
+  'birth.trueReading',
+  'birth.markedDates',
+  'birth.revealNotes',
+};
+
 /// The capability that sells a field, or null when it is free.
 ///
 /// Null for everything outside the rule above, which is most of the sheet —
@@ -259,6 +271,7 @@ String? _soldWith(String id) {
   final section = id.split('.').first;
   if (_companionSections.contains(section)) return 'characters.specialist';
   if (_companionAppearanceFields.contains(id)) return 'characters.specialist';
+  if (_calendarBibleBirthFields.contains(id)) return 'calendars.astrology';
   return null;
 }
 
@@ -871,6 +884,22 @@ final List<RecordFieldDefinition> _fields = [
       'notes.continuity', 'Continuity notes', RecordFieldType.longText, 1103),
   _field('notes.research', 'Research notes', RecordFieldType.longText, 1104),
   _field('notes.private', 'Private notes', RecordFieldType.longText, 1105),
+  // A birth reading, read in the character's own calendar (0.6.0). Two
+  // records, because a world with a registry has a public one and a true one,
+  // and the gap between them is often the story. Each date is a structured
+  // `TimelineDate`; each reading is a table of `{part, sign}` naming the
+  // calendar's `readingParts`. The reveal notes say when the truth comes out.
+  _field('birth.calendar', 'Calendar', RecordFieldType.recordReference, 1150,
+      referenceTypeIds: const ['calendar-definition']),
+  _field('birth.publicDate', 'Birth date on record', RecordFieldType.date, 1151),
+  _field('birth.publicReading', 'Reading on record', RecordFieldType.table,
+      1152),
+  _field('birth.trueDate', 'True birth date', RecordFieldType.date, 1153),
+  _field('birth.trueReading', 'True reading', RecordFieldType.table, 1154),
+  _field('birth.markedDates', 'Marked dates', RecordFieldType.list, 1155,
+      description: 'Name days, cursed dates, anniversaries that follow them.'),
+  _field('birth.revealNotes', 'When the truth comes out',
+      RecordFieldType.longText, 1156),
   _field(
       'media.primaryPortrait', 'Primary portrait', RecordFieldType.image, 1200),
   _field(
@@ -890,6 +919,7 @@ final List<RecordTemplateSection> _sections = [
   _section('voice', 'Voice', 900),
   _section('pov', 'POV profile', 1000),
   _section('notes', 'Notes', 1100),
+  _section('birth', 'Birth reading', 1150),
   _section('media', 'Portraits and references', 1200),
   ...[
     ('family', 'Family'),

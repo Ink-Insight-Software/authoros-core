@@ -1,5 +1,73 @@
 # Changelog
 
+## 0.8.0
+
+- **Knowledge tracking** (AOS-Write `PLAN.md` §3.52). New
+  `knowledge_ledger.dart`: `KnowledgeState`, `KnowledgeFact`,
+  `KnowledgeLedger` (read from `knows` links and the *Character knowledge*
+  table; `asOf` a reading position) and `sheetKnowledgeRows`. `knows` gains
+  *Lies About*, *Conceals* and a `learnedIn` metadata field.
+- Continuity: `detectKnowledgeConflicts` and `detectAgeConflicts`
+  (`continuity/knowledge_detector.dart`), run by `detectAll`, with the new
+  conditions `knowledgeConflict` and `ageConflict`.
+  `scenesInReadingOrder` and `readingPosition` place a scene or a depicted
+  event in reading order.
+- `readingPosition` places an event no scene depicts by its date, among
+  the depicted events of the same calendar and era; `compareStoryDates`.
+- `ConnectionTypeDefinition.isArchived`: an archived custom type is not
+  offered for new links and still resolves for existing ones.
+
+- **The Calendar Bible: calendars that mean things as well as count them**
+  (AOS-Write `PLAN.md` §3.50). New `calendar_bible.dart`, exported from
+  `timeline_domain.dart`: `CalendarMonthLore` (symbol, meaning, season,
+  associations, public belief, hidden truth, rituals, story meaning, plot
+  uses), `TimelineWeekday` (a day with what it is for),
+  `TimelineDateFormat`, `CalendarSpecialDate` (placed by month and day, or
+  told by timing), `CalendarSign` and `CalendarDetails` — the author's own
+  labelled details on any of them.
+- `TimelineCalendar` gains `weekdayDetails`, `dateFormats`,
+  `specialDates`, `signs` and `readingParts`; `weekdays`, `canCount`,
+  `weekdayOf`, `specialDatesOn`, `dateAt` (the inverse of `ordinal`),
+  `worldDayOf` / `dateAtWorldDay`, and `fromGregorian` / `toGregorian` by an
+  anchor in `conversionMetadata`. `convertTimelineDate` converts between
+  two calendars through a shared day count (`epoch.worldDay`).
+  `format(date, {template})` gains `{weekday}`, `{monthSymbol}` and
+  `{season}`, and collapses a missing weekday with its comma.
+- A month of length 0 is one not yet counted: dates in it name and write,
+  any day from 1 validates, and the calendar does not count days
+  (`canCount` is false).
+- `calendar-definition` declares the bible's fields in their own sections,
+  after the counting section, so older views read as they did.
+  `timelineCalendarFromRecord` reads them; a week stored as bare names
+  still reads.
+- Characters gain a **Birth reading** section (`birth.*`): a calendar, a
+  public and a true record, marked dates and reveal notes.
+- Continuity: `detectCalendarConflicts`, run by `detectAll`, reports the new
+  `StructuralCondition.calendarConflict` — a day the calendar does not have,
+  a festival on the wrong day, an event before a birth, a scene whose words
+  name another month.
+- **`PaidProduct.calendarBible`** (`curio-calendar-bible`), a paid Curio:
+  the calendar's lore, astrology and festivals. Eleven `calendar-definition`
+  fields and four `birth.*` fields carry `soldWith` (`calendars.lore`,
+  `calendars.astrology`, `calendars.festivals`); the months, week, eras,
+  epoch, formats, conversion and both birth dates stay unmarked and free.
+- `detectCalendarConflicts` matches names with `mentionsName`, the one
+  definition of a mention.
+- **The Codex Bible System** (AOS-Write `PLAN.md` §3.51). `bible.dart`: a
+  bible type is a project-scoped record type with entry sections in
+  `extensionData['bible']` (`BibleTypes`, `BibleEntrySection`); entries join
+  their bible by `partOf`, whose metadata declares `bibleSection`; rules an
+  author writes (`BibleRule`, `BibleRuleKind`, `BibleRules` under
+  `_bible.rules`). `bible_templates.dart`: nine starter bibles.
+  `hidden_truth.dart`: a hidden truth beside any field (`_truth.values`).
+- `PaidProduct.aosCasebook` (`aos-casebook`), `aosLorekeeper`
+  (`aos-lorekeeper`) and `aosCodexBibles` (`aos-codex-bibles`).
+  `BibleTemplate.soldWith` marks a paid starter bible.
+- Continuity: `detectBibleRules`, run by `detectAll`, reports the new
+  `StructuralCondition.bibleRule`. `characterBirthDate` is public for it.
+- `StoryClockLinks` moves here from AOS Write (`story_clock_links.dart`).
+- `AuthorRecord.copyWith` can change `extensionData`.
+
 ## 0.7.0
 
 Continuity reports what is really in the manuscript. Each item below was a

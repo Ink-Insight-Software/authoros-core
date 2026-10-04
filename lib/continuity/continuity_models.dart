@@ -59,6 +59,25 @@ enum StructuralCondition {
 
   /// World entities with no connection to the manuscript.
   unusedWorldbuilding,
+
+  /// A date the world's own calendar says cannot be right: a day it does not
+  /// have, a festival on the wrong day, an event before a birth, a scene
+  /// whose words name another month (AOS-Write PLAN.md §3.50).
+  calendarConflict,
+
+  /// A rule the author wrote in one of their bibles that a record breaks —
+  /// *every House has a sigil*, *a throne has one ruler* (AOS-Write PLAN.md
+  /// §3.51).
+  bibleRule,
+
+  /// Who knows what: the sheet and the graph contradicting each other, or a
+  /// subject named in a scene before the character learns it (AOS-Write
+  /// PLAN.md §3.52).
+  knowledgeConflict,
+
+  /// Ages that cannot be: a parent too young for their child, or a stated age
+  /// none of a character's dated events would give them (§3.52).
+  ageConflict,
 }
 
 extension StructuralConditionData on StructuralCondition {
@@ -73,6 +92,10 @@ extension StructuralConditionData on StructuralCondition {
         StructuralCondition.castGap => 'Cast gap',
         StructuralCondition.researchGap => 'Research gap',
         StructuralCondition.unusedWorldbuilding => 'Unused worldbuilding',
+        StructuralCondition.calendarConflict => 'Calendar conflict',
+        StructuralCondition.bibleRule => 'Broken bible rule',
+        StructuralCondition.knowledgeConflict => 'Knowledge conflict',
+        StructuralCondition.ageConflict => 'Age conflict',
       };
 
   /// One line explaining what the condition means, shown under the group
@@ -96,6 +119,14 @@ extension StructuralConditionData on StructuralCondition {
           'Research in use with nothing to cite.',
         StructuralCondition.unusedWorldbuilding =>
           'Built, and not yet drawn on.',
+        StructuralCondition.calendarConflict =>
+          'Dates the world\'s own calendar disagrees with.',
+        StructuralCondition.bibleRule =>
+          'Records that break a rule you wrote about your world.',
+        StructuralCondition.knowledgeConflict =>
+          'Who knows what, and when, disagrees with itself.',
+        StructuralCondition.ageConflict =>
+          'Ages and births that cannot both be true.',
       };
 
   /// The Studio that owns the records this condition is about.
@@ -105,12 +136,17 @@ extension StructuralConditionData on StructuralCondition {
         StructuralCondition.unresolvedRelationship =>
           ContinuityDestination.characters,
         StructuralCondition.orphanPlot => ContinuityDestination.plot,
-        StructuralCondition.timelineConflict =>
+        StructuralCondition.timelineConflict ||
+        StructuralCondition.calendarConflict =>
           ContinuityDestination.timeline,
         StructuralCondition.locationGap ||
-        StructuralCondition.unusedWorldbuilding =>
+        StructuralCondition.unusedWorldbuilding ||
+        StructuralCondition.bibleRule =>
           ContinuityDestination.world,
-        StructuralCondition.castGap => ContinuityDestination.characters,
+        StructuralCondition.castGap ||
+        StructuralCondition.knowledgeConflict ||
+        StructuralCondition.ageConflict =>
+          ContinuityDestination.characters,
         StructuralCondition.researchGap => ContinuityDestination.research,
       };
 }
