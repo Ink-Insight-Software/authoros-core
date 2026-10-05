@@ -1,4 +1,5 @@
 import 'built_in_record_types.dart';
+import 'civilisation_record_types.dart';
 import 'connection_types.dart';
 import 'plot_record_types.dart';
 import 'record_types.dart';
@@ -122,6 +123,21 @@ class BuiltInConnectionTypes {
       inverseLabel: 'Controlled by',
       builtIn: true,
       sourcePackId: 'authoros-core',
+    ),
+    // The land a people holds (`civilisation_record_types.dart`). Not
+    // `locatedIn`, which places a thing, nor `controls`, which is political
+    // rule and belongs to a government. Time-bounded, because peoples move,
+    // conquer and are driven out.
+    ConnectionTypeDefinition(
+      id: 'occupies',
+      displayName: 'Occupies',
+      sourceTypeIds: const [CivilisationRecordTypes.civilisationTypeId],
+      targetTypeIds: [...WorldRecordTypes.spatialTypeIds],
+      inverseLabel: 'Occupied by',
+      temporalSupport: true,
+      metadataFields: _timeBoundedMetadata,
+      builtIn: true,
+      sourcePackId: CivilisationRecordTypes.packId,
     ),
     const ConnectionTypeDefinition(
       id: 'locatedIn',

@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.10.0
+
+- **`civilisation`: a people and its systems** (AOS Worldsmith build plan,
+  Phase 2; the owner's choice of October 5, 2026 over *country plus a
+  profile*). New `civilisation_record_types.dart`: one type, in the World
+  category, with a people's own fields only — name for its people, other
+  names, standing, population, when it rose and fell, level of technology,
+  what defines it, and its history. Its culture, faith, language and
+  government are linked, never redescribed, through the existing `*`-typed
+  `hasCulture`, `worships`, `speaks` and `governedBy`.
+- **`occupies`**, from a civilisation to a place, time-bounded: the land a
+  people holds. Declared beside `locatedIn`, which places a thing, and
+  distinct from `controls`, which is political rule.
+- Additive: no existing type, field or relationship changes.
+
 ## 0.9.0
 
 - **Five files AOS Companion's engine needs, moved in from AOS-Write.** All
