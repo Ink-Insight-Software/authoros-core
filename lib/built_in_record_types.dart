@@ -9,6 +9,7 @@ import 'curio_activation.dart';
 import 'character_record_types.dart';
 import 'interrogation_session.dart';
 import 'climate_record_types.dart';
+import 'civilisation_record_types.dart';
 import 'culture_record_types.dart';
 import 'ecosystem_record_types.dart';
 import 'economy_record_types.dart';
@@ -62,6 +63,7 @@ class BuiltInRecordTypes {
     ...WorldRecordTypes.definitions,
     _faction,
     ...CultureRecordTypes.definitions,
+    ...CivilisationRecordTypes.definitions,
     ...ClimateRecordTypes.definitions,
     ...EcosystemRecordTypes.definitions,
     ...EconomyRecordTypes.definitions,
