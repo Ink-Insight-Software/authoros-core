@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.11.0
+
+- **`connection_engine.dart`, moved in from AOS-Write.** `ConnectionEngine`
+  connects, updates and disconnects records with their history, and
+  validates a connection's type, endpoints and cardinality before writing
+  it. AOS Worldsmith links a civilisation to its government, culture and
+  religion, and cannot import AOS-Write's `lib/`; writing a second engine
+  there would give the shared record model two ways to make a link. Every
+  file it imports was already here. Moved unchanged; AOS-Write replaces its
+  copy with a one-line export when it moves its pin past this release.
+  Additive: nothing existing changes.
+
 ## 0.10.0
 
 - **`civilisation`: a people and its systems** (AOS Worldsmith build plan,
