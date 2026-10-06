@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.12.0
+
+- **`pinned_records.dart`, moved in from AOS-Write.** `PinnedRecords` says
+  where a project's pinned records live: a Story Codex collection of kind
+  `pinned`, one record per project, `codex-collection-pinned-<projectId>`,
+  listing the pinned ids in pin order. AOS Worldsmith pins with the same
+  record, so neither application keeps its own pinning model.
+- **One record per project, not one for all.** AOS-Write kept a single
+  `codex-collection-pinned` for every project; records are written by
+  upsert, so opening a second project's Codex took it over, empty, and the
+  first project's pins were lost. A project whose `codex-collection-pinned`
+  is still scoped to it keeps using it (`collectionIn`); nothing is
+  rewritten. Additive: nothing existing changes.
+
 ## 0.11.0
 
 - **`connection_engine.dart`, moved in from AOS-Write.** `ConnectionEngine`
