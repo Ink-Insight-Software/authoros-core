@@ -33,7 +33,10 @@ credential to fetch it. A tag works too, but both applications pin commits.
 
 1. Change the code with a pull request here; CI analyzes it.
 2. Bump `version` in `pubspec.yaml` and add a `CHANGELOG.md` entry.
-3. Tag the merge commit `v<version>` and push the tag.
+3. Merge. `.github/workflows/tag-releases.yml` tags the merge commit
+   `v<version>` on the push to main. It only adds tags, never moves one, and
+   `tool/tag_releases.sh` prints what it would tag when run without
+   `--push`.
 4. Move each consumer's `ref` in its own pull request, where its own tests
    run against the new version.
 

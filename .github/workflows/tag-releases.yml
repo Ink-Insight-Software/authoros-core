@@ -1,0 +1,38 @@
+# Tags each released version on main (README "Releasing", step 3).
+#
+# Step 3 was never done by hand: no version from 0.1.0 to 0.12.0 had a tag,
+# because the sessions that cut them could not push tags. This does it from
+# GitHub's side. On every push to main it tags the first merge commit that
+# carries a version not yet tagged, so bumping `version` in a pull request is
+# the whole release; it can also be run by hand from the Actions tab.
+#
+# It only adds tags. One that exists is never moved or deleted.
+name: tag releases
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Two pushes in quick succession must not race to create the same tag.
+concurrency:
+  group: tag-releases
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  tag:
+    # Run by hand from another branch, it would tag that branch's versions.
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+      - name: Tag untagged versions
+        env:
+          TAG_BRANCH: HEAD
+        run: bash tool/tag_releases.sh --push
