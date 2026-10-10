@@ -3,8 +3,7 @@
 ## 0.15.0
 
 For AOS Worldsmith's Phases 5 to 8 (October 10, 2026). Additive: no type,
-field or edge is removed or renamed. Numbered 0.15.0 because the open
-archive change (#15) claims 0.14.0.
+field or edge is removed or renamed.
 
 - **Six new record types**, each checked against the tree first:
   - `religious-order`, a faction child, and `denomination`, a religion child
@@ -25,6 +24,26 @@ archive change (#15) claims 0.14.0.
 - **`consequence_traversal.dart`**: given a changed record, the records it
   may affect, by per-edge-type rules, each with the shortest path that
   reaches it. It is deterministic and writes nothing.
+
+## 0.14.0
+
+- **The archive carries a project's spatial document.**
+  `AuthorOsArchiveContents.cartographerDocuments` holds one document per
+  project, as Cartographer wrote it, at `data/cartographer-documents.jsonl`.
+  Opaque here for the same reason `manuscripts` is: maps and plans belong to
+  Cartographer (Casebook ADR-0001, rule 4), and importing its document model
+  would put a second description of a place in the core.
+- **So that a project stays one file.** The alternative was a `.cartographer`
+  package beside the project that an author has to keep alongside it, which is
+  how projects lose their maps.
+- **Additive, and byte-identical without one.** The entry is written only when
+  there is a document, so an archive from a project with no map is unchanged
+  from one written before this version. On read it is optional: absence means
+  *"this file says nothing about a map"*, never *"this project has no map"* —
+  the same terms as the roster.
+- **`ArchiveInspection` counts them** as `mappedProjects`, and counts them in
+  `isEmpty`, so an archive holding a project's maps and nothing else is not
+  reported as holding nothing.
 
 ## 0.13.0
 

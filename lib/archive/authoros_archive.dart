@@ -41,6 +41,7 @@ class AuthorOsArchiveContents {
     this.projects = const [],
     this.series = const [],
     this.sceneAuthorship = const [],
+    this.cartographerDocuments = const [],
   });
 
   final ConnectedDomainSnapshot snapshot;
@@ -66,6 +67,27 @@ class AuthorOsArchiveContents {
   /// before records were carried.
   final List<Map<String, dynamic>> sceneAuthorship;
 
+  /// One spatial document per project, as Cartographer writes it: its places,
+  /// maps, layers and the geometry depicting them.
+  ///
+  /// Opaque here, like [manuscripts], and for the same reason: maps and plans
+  /// belong to Cartographer (Casebook ADR-0001, rule 4), and importing its
+  /// document model would put a second description of a place in the core.
+  /// What travels is the document the engine wrote, keyed by project.
+  ///
+  /// Carried so that a project is one file. The alternative was a package
+  /// beside the project that an author has to keep alongside it, which is how
+  /// projects lose their maps.
+  ///
+  /// Each document must carry its own `projectId`: entries are keyed and
+  /// sorted by id, so a document without one fails the export rather than
+  /// landing somewhere unpredictable.
+  ///
+  /// Empty for an archive written before documents were carried — which a
+  /// restore must read as *"this file says nothing about a map"*, never as
+  /// *"this project has no map"*.
+  final List<Map<String, dynamic>> cartographerDocuments;
+
   /// Whether this archive carries a roster at all.
   bool get carriesRoster => projects.isNotEmpty;
 }
@@ -88,6 +110,7 @@ class AuthorOsArchiveService {
     Iterable<ProjectRosterEntry> projects = const [],
     Iterable<WritingSeries> series = const [],
     Iterable<Map<String, Object?>> sceneAuthorship = const [],
+    Iterable<Map<String, Object?>> cartographerDocuments = const [],
   }) {
     InMemoryConnectedDomainRepository(initial: snapshot);
     final entries = <String, Uint8List>{
@@ -185,6 +208,17 @@ class AuthorOsArchiveService {
           manuscripts.map((manuscript) => {
                 'id': manuscript['projectId'],
                 ...manuscript,
+              }),
+        ),
+      // Under data/, not content/: a spatial document is a graph of places,
+      // not the book. Keyed by project like `manuscripts`, and written only
+      // when there is one, so an archive from a project with no map stays
+      // byte-identical to one written before this entry existed.
+      if (cartographerDocuments.isNotEmpty)
+        'data/cartographer-documents.jsonl': _jsonLines(
+          cartographerDocuments.map((document) => {
+                'id': document['projectId'],
+                ...document,
               }),
         ),
     };
@@ -421,6 +455,10 @@ class AuthorOsArchiveService {
       sceneAuthorship: files.containsKey('content/scene-authorship.jsonl')
           ? _decodeJsonLines(files['content/scene-authorship.jsonl'])
           : const [],
+      cartographerDocuments:
+          files.containsKey('data/cartographer-documents.jsonl')
+              ? _decodeJsonLines(files['data/cartographer-documents.jsonl'])
+              : const [],
     );
   }
 
@@ -503,6 +541,7 @@ String _roleFor(String path) => switch (path) {
       'data/writing-sessions.jsonl' => 'writing-sessions',
       'data/revision-decisions.jsonl' => 'revision-decisions',
       'data/manuscripts.jsonl' => 'manuscripts',
+      'data/cartographer-documents.jsonl' => 'cartographer-documents',
       'data/projects.jsonl' => 'projects',
       'data/series.jsonl' => 'series',
       'content/scene-prose.jsonl' => 'scene-content',
