@@ -21,6 +21,10 @@ field or edge is removed or renamed.
   - `produces`: what a people, place or faction makes;
   - `tradesWith`: undirected, with the goods traded;
   - `atWarWith`: undirected and time-bounded, between powers.
+- **`app_presence.dart`**: which application last opened a project, and
+  when, so a world moved between AOS Worldsmith and AuthorOS Write can say
+  so. It uses one organisational record per project, the shape
+  `PinnedRecords` uses.
 - **`consequence_traversal.dart`**: given a changed record, the records it
   may affect, by per-edge-type rules, each with the shortest path that
   reaches it. It is deterministic and writes nothing.
