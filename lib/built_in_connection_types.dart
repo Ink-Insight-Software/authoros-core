@@ -15,8 +15,10 @@ class BuiltInConnectionTypes {
     _characterRelationship('enemyOf', 'Enemy', undirected: true),
     _characterRelationship('alliedWith', 'Ally', undirected: true),
     _characterRelationship('rivalOf', 'Rival', undirected: true),
-    _characterRelationship('partnerOf', 'Partner', undirected: true),
-    _characterRelationship('parentOf', 'Parent of', inverseLabel: 'Child of'),
+    _characterRelationship('partnerOf', 'Partner', undirected: true,
+        extra: _unionMetadata),
+    _characterRelationship('parentOf', 'Parent of',
+        inverseLabel: 'Child of', extra: _parentageMetadata),
     _characterRelationship(
       'guardianOf',
       'Guardian of',
@@ -985,11 +987,57 @@ const _codexMetadataFields = <RecordFieldDefinition>[
   ),
 ];
 
+/// What kind of union a `partnerOf` is (October 10, 2026, for AOS
+/// Worldsmith's Ancestry Room): betrothal, marriage and its ends. Beside the
+/// shared `beginning` and `ending` dates, so a widowing has a date and a
+/// betrothal that never became a marriage is still on record. Partners with
+/// no union recorded are partners, as before.
+const _unionMetadata = [
+  RecordFieldDefinition(
+    id: 'union',
+    label: 'Union',
+    type: RecordFieldType.singleChoice,
+    order: 20,
+    allowCustomValues: true,
+    options: [
+      'Betrothed',
+      'Married',
+      'Separated',
+      'Divorced',
+      'Annulled',
+      'Widowed',
+    ],
+  ),
+];
+
+/// Legitimacy and certainty of a `parentOf` (October 10, 2026, with
+/// [_unionMetadata]). Adoption and guardianship stay `guardianOf`: this is
+/// about a child of the body, and whether the world accepts it.
+const _parentageMetadata = [
+  RecordFieldDefinition(
+    id: 'legitimacy',
+    label: 'Legitimacy',
+    type: RecordFieldType.singleChoice,
+    order: 20,
+    allowCustomValues: true,
+    options: ['Legitimate', 'Born outside marriage', 'Legitimised'],
+  ),
+  RecordFieldDefinition(
+    id: 'parentage',
+    label: 'Parentage',
+    type: RecordFieldType.singleChoice,
+    order: 21,
+    allowCustomValues: true,
+    options: ['Certain', 'Disputed', 'Claimed'],
+  ),
+];
+
 ConnectionTypeDefinition _characterRelationship(
   String id,
   String displayName, {
   String? inverseLabel,
   bool undirected = false,
+  List<RecordFieldDefinition> extra = const [],
 }) =>
     ConnectionTypeDefinition(
       id: id,
@@ -1003,72 +1051,73 @@ ConnectionTypeDefinition _characterRelationship(
       temporalSupport: true,
       builtIn: true,
       sourcePackId: 'authoros-character-core',
-      metadataFields: const [
-        RecordFieldDefinition(
+      metadataFields: [
+        const RecordFieldDefinition(
           id: 'strength',
           label: 'Strength',
           type: RecordFieldType.rating,
           order: 0,
         ),
-        RecordFieldDefinition(
+        const RecordFieldDefinition(
           id: 'status',
           label: 'Status',
           type: RecordFieldType.shortText,
           order: 1,
         ),
-        RecordFieldDefinition(
+        const RecordFieldDefinition(
           id: 'beginning',
           label: 'Beginning',
           type: RecordFieldType.date,
           order: 2,
         ),
-        RecordFieldDefinition(
+        const RecordFieldDefinition(
           id: 'ending',
           label: 'Ending',
           type: RecordFieldType.date,
           order: 3,
         ),
-        RecordFieldDefinition(
+        const RecordFieldDefinition(
           id: 'mutuality',
           label: 'Mutuality',
           type: RecordFieldType.shortText,
           order: 4,
         ),
-        RecordFieldDefinition(
+        const RecordFieldDefinition(
           id: 'publicKnowledge',
           label: 'Public knowledge',
           type: RecordFieldType.boolean,
           order: 5,
         ),
-        RecordFieldDefinition(
+        const RecordFieldDefinition(
           id: 'secret',
           label: 'Secret',
           type: RecordFieldType.boolean,
           order: 6,
         ),
-        RecordFieldDefinition(
+        const RecordFieldDefinition(
           id: 'trust',
           label: 'Trust',
           type: RecordFieldType.rating,
           order: 7,
         ),
-        RecordFieldDefinition(
+        const RecordFieldDefinition(
           id: 'conflict',
           label: 'Conflict',
           type: RecordFieldType.longText,
           order: 8,
         ),
-        RecordFieldDefinition(
+        const RecordFieldDefinition(
           id: 'history',
           label: 'History',
           type: RecordFieldType.longText,
           order: 9,
         ),
-        RecordFieldDefinition(
+        const RecordFieldDefinition(
           id: 'notes',
           label: 'Notes',
           type: RecordFieldType.longText,
           order: 10,
         ),
+        ...extra,
       ],
     );

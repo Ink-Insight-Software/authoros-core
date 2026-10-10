@@ -1,6 +1,10 @@
 /// The Bloodlines specialist system's record types.
 ///
-/// Two types — `house` and `clan` — both bare `faction` children with **no
+/// Four types since October 10, 2026: `house` and `clan`, below, and `title`
+/// and `estate`, added for AOS Worldsmith's Ancestry Room and described at
+/// the foot of this file.
+///
+/// `house` and `clan` began as bare `faction` children with **no
 /// fields of their own**. They inherit faction's nineteen, which describe an
 /// organisation: purpose, leadership, members, hierarchy, territory, allies,
 /// enemies, resources. Every one of those is true of a house, and none of them
@@ -47,6 +51,7 @@
 library;
 
 import 'record_types.dart';
+import 'world_record_types.dart';
 
 class BloodlineRecordTypes {
   const BloodlineRecordTypes._();
@@ -54,8 +59,26 @@ class BloodlineRecordTypes {
   static const houseTypeId = 'house';
   static const clanTypeId = 'clan';
 
+  /// What a family holds by right: a rank, and the succession it passes by.
+  /// New October 10, 2026, for AOS Worldsmith's Ancestry Room.
+  static const titleTypeId = 'title';
+
+  /// What a title or a House holds on the ground: a seat, lands, revenue.
+  /// New October 10, 2026, with [titleTypeId].
+  static const estateTypeId = 'estate';
+
   /// Every type the Bloodlines system presents.
-  static const List<String> recordTypeIds = [houseTypeId, clanTypeId];
+  static const List<String> recordTypeIds = [
+    houseTypeId,
+    clanTypeId,
+    titleTypeId,
+    estateTypeId,
+  ];
+
+  /// The two kinship types, both children of `faction`: what
+  /// [inheritedFieldIds] and [sharedFieldIds] describe. A title and an estate
+  /// are what a family holds, not a family, and inherit neither.
+  static const List<String> kinTypeIds = [houseTypeId, clanTypeId];
 
   /// The base both descend from, deliberately left unclaimed.
   static const String factionFoundationTypeId = 'faction';
@@ -107,7 +130,12 @@ class BloodlineRecordTypes {
     'standing',
   ];
 
-  static final List<RecordTypeDefinition> definitions = [_house, _clan];
+  static final List<RecordTypeDefinition> definitions = [
+    _house,
+    _clan,
+    _title,
+    _estate,
+  ];
 }
 
 const _codexTemplate = <String, Object?>{
@@ -259,6 +287,201 @@ final _clan = RecordTypeDefinition(
     'originatedFrom',
   ],
   templateVersion: 2,
+  builtIn: true,
+  sourcePackId: 'authoros-bloodlines-system',
+  permissions: const {'editableDefinition': false},
+  exportBehavior: const {'includeStructuredFields': true},
+  extensionData: _codexTemplate,
+);
+
+// ---------------------------------------------------------------------------
+// Titles and estates (October 10, 2026)
+// ---------------------------------------------------------------------------
+//
+// AOS Worldsmith's Ancestry Room needed somewhere to say *Duke of Harrowmere*
+// and *the Harrowmere lands* apart from the person and the House. Neither
+// existed: `political-office` is a post a government fills ("Lord
+// Chancellor"), and a title is a dignity a family holds and passes, whether or
+// not it carries any office. Keeping them apart is what lets a dynasty lose
+// the chancellorship and keep the dukedom.
+//
+// Both are free types with free fields, like `house` and `clan`: ADR-0017
+// gates depth by field, never a type, and nothing here is sold. Succession is
+// recorded here as the rule a title passes by; the line of succession itself
+// is read by the Council Chamber's succession model, which is the only
+// succession engine (Worldsmith build plan, Phase 5).
+
+RecordFieldDefinition _detail(
+  String id,
+  String label,
+  RecordFieldType type,
+  int order, {
+  String description = '',
+  List<String> referenceTypeIds = const [],
+  String? optionSetId,
+  bool allowCustomValues = false,
+  bool quickCreateVisible = false,
+}) =>
+    RecordFieldDefinition(
+      id: id,
+      label: label,
+      type: type,
+      order: order,
+      description: description,
+      referenceTypeIds: referenceTypeIds,
+      optionSetId: optionSetId,
+      allowCustomValues: allowCustomValues,
+      quickCreateVisible: quickCreateVisible,
+      extensionData: const {'visibility': 'default', 'templateOwned': true},
+    );
+
+const _titleSuccession = RecordOptionSet(
+  id: 'title-succession',
+  name: 'Succession',
+  description: 'The rule a title passes by, from one holder to the next.',
+  values: [
+    'Male-line primogeniture',
+    'Absolute primogeniture',
+    'Seniority',
+    'Elective',
+    'Tanistry',
+    'Appointed by the crown',
+    'Partible',
+    'Ultimogeniture',
+    'Life only',
+  ],
+);
+
+/// A dignity a family holds and passes: its rank, who holds it now, and the
+/// rule it passes by.
+final _title = RecordTypeDefinition(
+  id: BloodlineRecordTypes.titleTypeId,
+  name: 'Title',
+  description: 'A dignity held and passed down: its rank, who holds it, and '
+      'the rule it passes by.',
+  icon: 'workspace_premium',
+  categoryId: 'factions',
+  baseTypeId: 'general-lore',
+  optionSets: const [_titleSuccession],
+  fields: [
+    _detail('rank', 'Rank', RecordFieldType.shortText, 200,
+        description: 'Duke, khan, margravine, high priestess of the third '
+            'flame. Say it the way the world says it.',
+        quickCreateVisible: true),
+    _detail('holder', 'Current holder', RecordFieldType.recordReference, 201,
+        referenceTypeIds: const ['character'],
+        description: 'The title outlives them; keep them apart.',
+        quickCreateVisible: true),
+    _detail('house', 'House', RecordFieldType.recordReference, 202,
+        referenceTypeIds: const [
+          BloodlineRecordTypes.houseTypeId,
+          BloodlineRecordTypes.clanTypeId,
+        ],
+        description: 'The family it belongs to, which may not be the '
+            'holder\'s.'),
+    _detail('estate', 'Estate', RecordFieldType.recordReference, 203,
+        referenceTypeIds: const [BloodlineRecordTypes.estateTypeId],
+        description: 'What it holds on the ground, if anything. Some titles '
+            'are only a name.'),
+    _detail('succession', 'Passes by', RecordFieldType.singleChoice, 210,
+        optionSetId: 'title-succession', allowCustomValues: true),
+    _detail('successor', 'Heir', RecordFieldType.recordReference, 211,
+        referenceTypeIds: const ['character'],
+        description: 'Who is next by the rule, if the rule is followed.'),
+    _detail('predecessors', 'Former holders', RecordFieldType.list, 212),
+    _detail('contested', 'Contested by', RecordFieldType.longText, 213,
+        description: 'Rival claims, and what each one rests on.'),
+    _detail('grantedBy', 'Granted by', RecordFieldType.recordReference, 220,
+        referenceTypeIds: const ['government', 'character', 'faction'],
+        description: 'Who made it, and so who could unmake it.'),
+    _detail('created', 'Created', RecordFieldType.shortText, 221,
+        description: 'When it was first granted, in the world\'s reckoning.'),
+    _detail('style', 'Style of address', RecordFieldType.shortText, 222,
+        description: 'Your Grace, Most Serene, Mother of the Hearth.'),
+    _detail('precedence', 'Precedence', RecordFieldType.shortText, 223,
+        description: 'Where it stands among the others, and who disputes '
+            'that.'),
+  ],
+  sections: const [
+    RecordTemplateSection(
+      id: 'title-dignity',
+      title: 'The dignity',
+      order: 20,
+      fieldIds: ['rank', 'holder', 'house', 'estate'],
+    ),
+    RecordTemplateSection(
+      id: 'title-succession',
+      title: 'Succession',
+      order: 21,
+      fieldIds: ['succession', 'successor', 'predecessors', 'contested'],
+    ),
+    RecordTemplateSection(
+      id: 'title-origin',
+      title: 'Origin and standing',
+      order: 22,
+      fieldIds: ['grantedBy', 'created', 'style', 'precedence'],
+    ),
+  ],
+  suggestedLinkTypeIds: const ['belongsTo', 'associatedWith'],
+  templateVersion: 1,
+  builtIn: true,
+  sourcePackId: 'authoros-bloodlines-system',
+  permissions: const {'editableDefinition': false},
+  exportBehavior: const {'includeStructuredFields': true},
+  extensionData: _codexTemplate,
+);
+
+/// Land held by right: its seat, what it yields, and who holds it.
+final _estate = RecordTypeDefinition(
+  id: BloodlineRecordTypes.estateTypeId,
+  name: 'Estate',
+  description: 'Land held by right: its seat, what it yields, and who holds '
+      'it.',
+  icon: 'castle',
+  categoryId: 'factions',
+  baseTypeId: 'general-lore',
+  fields: [
+    _detail('holder', 'Held by', RecordFieldType.recordReference, 200,
+        referenceTypeIds: const [
+          'character',
+          BloodlineRecordTypes.houseTypeId,
+          BloodlineRecordTypes.clanTypeId,
+          'faction',
+        ],
+        quickCreateVisible: true),
+    _detail('seat', 'Seat', RecordFieldType.recordReference, 201,
+        referenceTypeIds: [...WorldRecordTypes.spatialTypeIds],
+        description: 'The place the estate is run from.',
+        quickCreateVisible: true),
+    _detail('lands', 'Lands', RecordFieldType.longText, 202,
+        description: 'What it covers. Link the regions for the map.'),
+    _detail('title', 'Title', RecordFieldType.recordReference, 203,
+        referenceTypeIds: const [BloodlineRecordTypes.titleTypeId],
+        description: 'The dignity it goes with, if it goes with one.'),
+    _detail('yield', 'Yield', RecordFieldType.longText, 210,
+        description: 'What it produces and what it is worth.'),
+    _detail('obligations', 'Obligations', RecordFieldType.richText, 211,
+        description: 'What is owed for it: levies, tithes, homage.'),
+    _detail('entail', 'Entail', RecordFieldType.shortText, 212,
+        description: 'Whether it can be sold, split or left to anyone but '
+            'the heir.'),
+  ],
+  sections: const [
+    RecordTemplateSection(
+      id: 'estate-holding',
+      title: 'The holding',
+      order: 20,
+      fieldIds: ['holder', 'seat', 'lands', 'title'],
+    ),
+    RecordTemplateSection(
+      id: 'estate-worth',
+      title: 'Worth and obligation',
+      order: 21,
+      fieldIds: ['yield', 'obligations', 'entail'],
+    ),
+  ],
+  suggestedLinkTypeIds: const ['belongsTo', 'locatedIn', 'associatedWith'],
+  templateVersion: 1,
   builtIn: true,
   sourcePackId: 'authoros-bloodlines-system',
   permissions: const {'editableDefinition': false},
