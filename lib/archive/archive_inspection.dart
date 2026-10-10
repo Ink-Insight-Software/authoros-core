@@ -22,6 +22,7 @@ ArchiveInspection inspectionOf(AuthorOsArchiveContents contents) {
     writingSessions: snapshot.writingSessions.length,
     revisionDecisions: snapshot.revisionDecisions.length,
     projects: contents.projects.length,
+    mappedProjects: contents.cartographerDocuments.length,
   );
 }
 
@@ -35,6 +36,7 @@ class ArchiveInspection {
     required this.writingSessions,
     this.revisionDecisions = 0,
     this.projects = 0,
+    this.mappedProjects = 0,
   });
 
   final int records;
@@ -52,6 +54,12 @@ class ArchiveInspection {
   /// before the roster was, which says nothing about how many there were.
   final int projects;
 
+  /// Projects whose spatial document the archive carries — one per project,
+  /// as Cartographer wrote it. Zero on the same terms as [projects]: an
+  /// archive written before documents were carried says nothing about whether
+  /// a project had a map.
+  final int mappedProjects;
+
   /// True when the archive parsed, every checksum matched, and it holds
   /// something. An archive that verifies but is empty is a real answer and not
   /// a good one, so the two are reported apart.
@@ -60,7 +68,10 @@ class ArchiveInspection {
       links == 0 &&
       manuscripts == 0 &&
       scenesWithProse == 0 &&
-      projects == 0;
+      projects == 0 &&
+      // Counted here too, so an archive holding a project's maps and nothing
+      // else is not reported as holding nothing.
+      mappedProjects == 0;
 
   /// One line for a screen: what an author would get back.
   String get summary {
@@ -79,6 +90,9 @@ class ArchiveInspection {
       if (revisionDecisions > 0)
         '$revisionDecisions revision '
             '${_plural(revisionDecisions, 'decision', 'decisions')}',
+      if (mappedProjects > 0)
+        '$mappedProjects '
+            '${_plural(mappedProjects, 'mapped project', 'mapped projects')}',
     ];
     return parts.join(' · ');
   }
