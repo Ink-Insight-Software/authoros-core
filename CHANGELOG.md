@@ -1,5 +1,30 @@
 # Changelog
 
+## 0.14.0
+
+For AOS Worldsmith's Phases 5 to 8 (October 10, 2026). Additive: no type,
+field or edge is removed or renamed.
+
+- **Six new record types**, each checked against the tree first:
+  - `religious-order`, a faction child, and `denomination`, a religion child
+    (`FaithInstitutionRecordTypes`);
+  - `legal-code` (groups laws by reference), and `court`, `military-force`
+    and `intelligence-service`, all faction children
+    (`LawAndWarRecordTypes`).
+- **New fields:**
+  - `world.currentEra` says which era is now.
+  - `house` and `clan` gain `inheritedTraits`, `bloodlineRequirements` and
+    `hiddenAncestry` (in `sharedFieldIds`), under a *The blood* section.
+- **Four new edges:**
+  - `variesIn`: a culture's regional or generational variant, with what
+    differs;
+  - `produces`: what a people, place or faction makes;
+  - `tradesWith`: undirected, with the goods traded;
+  - `atWarWith`: undirected and time-bounded, between powers.
+- **`consequence_traversal.dart`**: given a changed record, the records it
+  may affect, by per-edge-type rules, each with the shortest path that
+  reaches it. It is deterministic and writes nothing.
+
 ## 0.13.0
 
 - **`title` and `estate`, new Bloodlines types** (October 10, 2026, for AOS

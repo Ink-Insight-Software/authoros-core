@@ -128,6 +128,9 @@ class BloodlineRecordTypes {
     'feuds',
     'heirlooms',
     'standing',
+    'inheritedTraits',
+    'bloodlineRequirements',
+    'hiddenAncestry',
   ];
 
   static final List<RecordTypeDefinition> definitions = [
@@ -178,6 +181,22 @@ List<RecordFieldDefinition> _shared({int from = 200}) => [
       _field('standing', 'Standing', RecordFieldType.shortText, from + 5,
           description: 'Ascendant, diminished, attainted, extinct in the '
               'senior line.'),
+      // The bloodline proper (AOS Worldsmith, Phase 5, October 10, 2026):
+      // what is inherited with the blood rather than the name. Biological
+      // lineage stays Evolution's `lineage`; these are the family's own
+      // claims about itself.
+      _field('inheritedTraits', 'Inherited traits', RecordFieldType.list,
+          from + 6,
+          description: 'What runs in the family: a likeness, a gift, a '
+              'curse, a condition.'),
+      _field('bloodlineRequirements', 'Bloodline requirements',
+          RecordFieldType.longText, from + 7,
+          description: 'What the blood must be to count: whose descent, how '
+              'pure, proved how.'),
+      _field('hiddenAncestry', 'Hidden ancestry', RecordFieldType.richText,
+          from + 8,
+          description: 'What the family does not say about where it came '
+              'from.'),
     ];
 
 const _sharedSections = [
@@ -192,6 +211,12 @@ const _sharedSections = [
     title: 'Ties',
     order: 21,
     fieldIds: ['marriages', 'feuds', 'heirlooms'],
+  ),
+  RecordTemplateSection(
+    id: 'bloodline-blood',
+    title: 'The blood',
+    order: 22,
+    fieldIds: ['inheritedTraits', 'bloodlineRequirements', 'hiddenAncestry'],
   ),
 ];
 

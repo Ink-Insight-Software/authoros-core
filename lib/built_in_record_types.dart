@@ -1,3 +1,5 @@
+import 'faith_institution_record_types.dart';
+import 'law_and_war_record_types.dart';
 import 'alchemy_record_types.dart';
 import 'architecture_record_types.dart';
 import 'astronomy_record_types.dart';
@@ -64,6 +66,8 @@ class BuiltInRecordTypes {
     _faction,
     ...CultureRecordTypes.definitions,
     ...CivilisationRecordTypes.definitions,
+    ...FaithInstitutionRecordTypes.definitions,
+    ...LawAndWarRecordTypes.definitions,
     ...ClimateRecordTypes.definitions,
     ...EcosystemRecordTypes.definitions,
     ...EconomyRecordTypes.definitions,
@@ -348,13 +352,22 @@ const _world = RecordTypeDefinition(
       type: RecordFieldType.longText,
       order: 103,
     ),
+    // Which era is *now*, said by the author rather than guessed from the
+    // eras' order (AOS Worldsmith's Hall reads it; October 10, 2026).
+    RecordFieldDefinition(
+      id: 'currentEra',
+      label: 'Current era',
+      type: RecordFieldType.recordReference,
+      order: 104,
+      referenceTypeIds: ['timeline-era', 'timeline-historical-period'],
+    ),
   ],
   sections: [
     RecordTemplateSection(
       id: 'worldbuilding',
       title: 'Worldbuilding',
       order: 10,
-      fieldIds: ['geography', 'politics', 'economy', 'history'],
+      fieldIds: ['geography', 'politics', 'economy', 'history', 'currentEra'],
     ),
   ],
   suggestedLinkTypeIds: ['contains', 'governedBy'],
