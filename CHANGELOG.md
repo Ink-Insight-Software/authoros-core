@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.13.0
+
+- **`title` and `estate`, new Bloodlines types** (October 10, 2026, for AOS
+  Worldsmith's Ancestry Room). A title is a dignity a family holds and
+  passes (rank, holder, House, estate, the rule it passes by, heir, former
+  holders, who granted it); an estate is land held by right (holder, seat,
+  lands, title, yield, obligations, entail). Free types with free fields, as
+  `house` and `clan` are. Neither is `political-office`, which is a post a
+  government fills.
+- **`partnerOf` gains `union`** (betrothed, married, separated, divorced,
+  annulled, widowed) and **`parentOf` gains `legitimacy` and `parentage`**,
+  as link metadata beside the existing dates. Links without them read as
+  before.
+- **`story_graph.dart` and `story_graph_modes.dart` move in** from AuthorOS
+  Write's `lib/core/`, unchanged, so the Loom's canvas can move to
+  `authoros_ui`.
+
 ## 0.12.0
 
 - **`pinned_records.dart`, moved in from AOS-Write.** `PinnedRecords` says
