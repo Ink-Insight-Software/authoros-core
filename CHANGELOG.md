@@ -16,6 +16,9 @@
 - **`story_graph.dart` and `story_graph_modes.dart` move in** from AuthorOS
   Write's `lib/core/`, unchanged, so the Loom's canvas can move to
   `authoros_ui`.
+- `BloodlineRecordTypes.kinTypeIds`: `house` and `clan`, the two kinship
+  types the inherited and shared field lists describe. `recordTypeIds` is
+  all four.
 
 ## 0.12.0
 

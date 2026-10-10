@@ -75,6 +75,11 @@ class BloodlineRecordTypes {
     estateTypeId,
   ];
 
+  /// The two kinship types, both children of `faction`: what
+  /// [inheritedFieldIds] and [sharedFieldIds] describe. A title and an estate
+  /// are what a family holds, not a family, and inherit neither.
+  static const List<String> kinTypeIds = [houseTypeId, clanTypeId];
+
   /// The base both descend from, deliberately left unclaimed.
   static const String factionFoundationTypeId = 'faction';
 
