@@ -25,10 +25,10 @@ class AppPresenceReading {
   String? get lastApp {
     String? app;
     DateTime? at;
-    for (final MapEntry(key: id, value: when) in openedAt.entries) {
-      if (at == null || when.isAfter(at)) {
+    for (final MapEntry(key: id, value: time) in openedAt.entries) {
+      if (at == null || time.isAfter(at)) {
         app = id;
-        at = when;
+        at = time;
       }
     }
     return app;
@@ -38,9 +38,9 @@ class AppPresenceReading {
   /// The first time [app] opens it, any other application's opening counts.
   bool openedElsewhereSince(String app) {
     final mine = openedAt[app];
-    for (final MapEntry(key: id, value: when) in openedAt.entries) {
+    for (final MapEntry(key: id, value: time) in openedAt.entries) {
       if (id == app) continue;
-      if (mine == null || when.isAfter(mine)) return true;
+      if (mine == null || time.isAfter(mine)) return true;
     }
     return false;
   }
