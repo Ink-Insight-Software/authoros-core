@@ -141,6 +141,96 @@ class BuiltInConnectionTypes {
       builtIn: true,
       sourcePackId: CivilisationRecordTypes.packId,
     ),
+    // AOS Worldsmith, Phases 6 and 7 (October 10, 2026): the four edges its
+    // rooms needed and the vocabulary could not say.
+    //
+    // `variesIn`: a culture as it is lived somewhere, or at some time. A
+    // regional or generational variant is this edge with what differs, never
+    // a copied culture (Lock 1).
+    ConnectionTypeDefinition(
+      id: 'variesIn',
+      displayName: 'Varies in',
+      sourceTypeIds: const ['culture'],
+      targetTypeIds: [
+        ...WorldRecordTypes.spatialTypeIds,
+        'timeline-era',
+        'timeline-historical-period',
+      ],
+      inverseLabel: 'Has a variant of',
+      metadataFields: const [
+        RecordFieldDefinition(
+          id: 'variation',
+          label: 'What differs here',
+          type: RecordFieldType.longText,
+          order: 0,
+        ),
+      ],
+      builtIn: true,
+      sourcePackId: 'authoros-culture-system',
+    ),
+    // `produces`: what a people, a place or a faction makes or digs up. The
+    // economy system declined `industry` in favour of this edge.
+    ConnectionTypeDefinition(
+      id: 'produces',
+      displayName: 'Produces',
+      sourceTypeIds: [
+        'civilisation',
+        'faction',
+        'government',
+        'character',
+        ...WorldRecordTypes.spatialTypeIds,
+      ],
+      targetTypeIds: ['resource', 'item'],
+      inverseLabel: 'Produced by',
+      builtIn: true,
+      sourcePackId: 'authoros-economy-system',
+    ),
+    // `tradesWith`: two parties that trade, and in what.
+    const ConnectionTypeDefinition(
+      id: 'tradesWith',
+      displayName: 'Trades with',
+      sourceTypeIds: ['*'],
+      targetTypeIds: ['*'],
+      inverseLabel: 'Trades with',
+      direction: ConnectionDirection.undirected,
+      metadataFields: [
+        RecordFieldDefinition(
+          id: 'goods',
+          label: 'Goods',
+          type: RecordFieldType.list,
+          order: 0,
+        ),
+      ],
+      builtIn: true,
+      sourcePackId: 'authoros-economy-system',
+    ),
+    // `atWarWith`: open war between powers. `enemyOf` is a character's
+    // enmity; a war is between peoples, governments and their forces, and
+    // it begins and ends.
+    ConnectionTypeDefinition(
+      id: 'atWarWith',
+      displayName: 'At war with',
+      sourceTypeIds: const [
+        'faction',
+        'government',
+        'civilisation',
+        'country',
+        'nation',
+      ],
+      targetTypeIds: const [
+        'faction',
+        'government',
+        'civilisation',
+        'country',
+        'nation',
+      ],
+      inverseLabel: 'At war with',
+      direction: ConnectionDirection.undirected,
+      temporalSupport: true,
+      metadataFields: _timeBoundedMetadata,
+      builtIn: true,
+      sourcePackId: 'authoros-law-and-war-system',
+    ),
     const ConnectionTypeDefinition(
       id: 'locatedIn',
       displayName: 'Located in',

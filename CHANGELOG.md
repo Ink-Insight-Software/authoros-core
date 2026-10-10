@@ -1,5 +1,35 @@
 # Changelog
 
+## 0.15.0
+
+For AOS Worldsmith's Phases 5 to 8 (October 10, 2026). Additive: no type,
+field or edge is removed or renamed.
+
+- **Six new record types**, each checked against the tree first:
+  - `religious-order`, a faction child, and `denomination`, a religion child
+    (`FaithInstitutionRecordTypes`);
+  - `legal-code`, which a law joins by `partOf`, and `court`,
+    `military-force` and `intelligence-service`, all faction children
+    (`LawAndWarRecordTypes`).
+- **New fields:**
+  - `world.currentEra` says which era is now (`world` template version 2).
+  - `house` and `clan` gain `inheritedTraits`, `bloodlineRequirements` and
+    `hiddenAncestry` (in `sharedFieldIds`), under a *The blood* section
+    (template version 3).
+- **Four new edges:**
+  - `variesIn`: a culture's regional or generational variant, with what
+    differs;
+  - `produces`: what a people, place, faction, government or person makes;
+  - `tradesWith`: undirected, with the goods traded;
+  - `atWarWith`: undirected and time-bounded, between powers.
+- **`app_presence.dart`**: which application last opened a project, and
+  when, so a world moved between AOS Worldsmith and AuthorOS Write can say
+  so. It uses one organisational record per project, the shape
+  `PinnedRecords` uses.
+- **`consequence_traversal.dart`**: given a changed record, the records it
+  may affect, by per-edge-type rules, each with the shortest path that
+  reaches it. It is deterministic and writes nothing.
+
 ## 0.14.0
 
 - **The archive carries a project's spatial document.**
