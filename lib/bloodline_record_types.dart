@@ -261,7 +261,8 @@ final _house = RecordTypeDefinition(
     'ruledBy',
     'associatedWith',
   ],
-  templateVersion: 2,
+  // 3 since October 10, 2026: the blood's three fields.
+  templateVersion: 3,
   builtIn: true,
   sourcePackId: 'authoros-bloodlines-system',
   permissions: const {'editableDefinition': false},
@@ -311,7 +312,8 @@ final _clan = RecordTypeDefinition(
     'associatedWith',
     'originatedFrom',
   ],
-  templateVersion: 2,
+  // 3 since October 10, 2026: the blood's three fields.
+  templateVersion: 3,
   builtIn: true,
   sourcePackId: 'authoros-bloodlines-system',
   permissions: const {'editableDefinition': false},

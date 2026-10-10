@@ -170,10 +170,16 @@ class BuiltInConnectionTypes {
     ),
     // `produces`: what a people, a place or a faction makes or digs up. The
     // economy system declined `industry` in favour of this edge.
-    const ConnectionTypeDefinition(
+    ConnectionTypeDefinition(
       id: 'produces',
       displayName: 'Produces',
-      sourceTypeIds: ['*'],
+      sourceTypeIds: [
+        'civilisation',
+        'faction',
+        'government',
+        'character',
+        ...WorldRecordTypes.spatialTypeIds,
+      ],
       targetTypeIds: ['resource', 'item'],
       inverseLabel: 'Produced by',
       builtIn: true,

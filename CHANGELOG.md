@@ -8,17 +8,18 @@ field or edge is removed or renamed.
 - **Six new record types**, each checked against the tree first:
   - `religious-order`, a faction child, and `denomination`, a religion child
     (`FaithInstitutionRecordTypes`);
-  - `legal-code` (groups laws by reference), and `court`, `military-force`
-    and `intelligence-service`, all faction children
+  - `legal-code`, which a law joins by `partOf`, and `court`,
+    `military-force` and `intelligence-service`, all faction children
     (`LawAndWarRecordTypes`).
 - **New fields:**
-  - `world.currentEra` says which era is now.
+  - `world.currentEra` says which era is now (`world` template version 2).
   - `house` and `clan` gain `inheritedTraits`, `bloodlineRequirements` and
-    `hiddenAncestry` (in `sharedFieldIds`), under a *The blood* section.
+    `hiddenAncestry` (in `sharedFieldIds`), under a *The blood* section
+    (template version 3).
 - **Four new edges:**
   - `variesIn`: a culture's regional or generational variant, with what
     differs;
-  - `produces`: what a people, place or faction makes;
+  - `produces`: what a people, place, faction, government or person makes;
   - `tradesWith`: undirected, with the goods traded;
   - `atWarWith`: undirected and time-bounded, between powers.
 - **`app_presence.dart`**: which application last opened a project, and

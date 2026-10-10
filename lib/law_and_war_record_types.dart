@@ -6,8 +6,9 @@
 /// the plan's §3 requires:
 ///
 /// * **`legal-code`** groups laws; it does not replace `law`, which stays in
-///   the Government system. It names its laws by reference, so a law is one
-///   record however many codes cite it.
+///   the Government system. A law joins a code by `partOf` (law → code), an
+///   edge rather than a field, because a reference field holds one record and
+///   a code gathers many. A law stays one record whichever code it is in.
 /// * **`court`**, **`military-force`** and **`intelligence-service`** are
 ///   bodies of people with leaders, members and a hierarchy: factions. Each
 ///   inherits `faction` as `military-unit` does and adds only what a faction
@@ -146,9 +147,6 @@ final _legalCode = _definition(
   baseTypeId: 'general-lore',
   sectionTitle: 'The code',
   fields: [
-    _field('laws', 'Laws it gathers', RecordFieldType.recordReference, 200,
-        referenceTypeIds: const ['law'],
-        description: 'Each law is its own record; the code names it.'),
     _field(
         'jurisdiction', 'Where it runs', RecordFieldType.recordReference, 201,
         referenceTypeIds: _jurisdictionTypes, quickCreateVisible: true),

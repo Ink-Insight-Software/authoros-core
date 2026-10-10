@@ -371,6 +371,8 @@ const _world = RecordTypeDefinition(
     ),
   ],
   suggestedLinkTypeIds: ['contains', 'governedBy'],
+  // 2 since October 10, 2026: `currentEra`.
+  templateVersion: 2,
   builtIn: true,
   sourcePackId: 'authoros-core',
   permissions: {'editableDefinition': false},
