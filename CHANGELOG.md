@@ -1,9 +1,10 @@
 # Changelog
 
-## 0.14.0
+## 0.15.0
 
 For AOS Worldsmith's Phases 5 to 8 (October 10, 2026). Additive: no type,
-field or edge is removed or renamed.
+field or edge is removed or renamed. Numbered 0.15.0 because the open
+archive change (#15) claims 0.14.0.
 
 - **Six new record types**, each checked against the tree first:
   - `religious-order`, a faction child, and `denomination`, a religion child
