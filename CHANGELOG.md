@@ -1,5 +1,37 @@
 # Changelog
 
+## 0.16.0
+
+So the Linguist's Study can open in AOS Worldsmith without losing an
+author's work (October 11, 2026). Additive: nothing is removed or renamed.
+
+- **The archive carries every extension's per-project working layer.**
+  `AuthorOsArchiveContents.extensionDocuments`, and the matching
+  `exportSnapshot` parameter, hold `{extension, projectId, document}` entries
+  at `data/extension-documents.jsonl`, keyed `"$extension:$projectId"`. One
+  generic slot rather than one per extension, so Hearts & Tensions' sidecar
+  can travel the way Language Forge's now does. Written only when non-empty,
+  so an archive without it is byte-identical to a 0.15.0 one; optional on
+  read; an entry without its extension or project fails the export.
+  `extensionDocumentsFor(extension)` reads one extension's documents back.
+- **Language Forge's pure-Dart model moved here** from AuthorOS Write's
+  Language Forge expansion, under `lib/language_forge/`, one library per file
+  and `lib/language_forge.dart` exporting them all: phonology, the
+  phonology text form and guided build, the word and name forges, naming
+  conventions, script mapping, grammar, the translation workbench, sound
+  change, lexicon, lineage, Linguistic Continuity, the Study's read model,
+  the language profile, and the working layer itself
+  (`LanguageForgeWorkspace`, `ReservedWord`). Behaviour is unchanged; the
+  expansion's files are now one-line exports of these. The
+  `SharedPreferences` store stayed in the expansion.
+- **`LanguageForgeWorkspace` gains** `extensionId` (`language-forge`),
+  `schemaVersion`, `toDocument`/`fromDocument` for the archive slot, and
+  `remapIds`/`remapDocumentIds`, so a world imported or duplicated with fresh
+  record ids keeps its phonologies, scripts, grammar and conventions keyed to
+  the new ids.
+- **The package's first tests of its own**, under `test/`, with `test` as a
+  dev dependency only. The older ones still live in AOS-Write.
+
 ## 0.15.0
 
 For AOS Worldsmith's Phases 5 to 8 (October 10, 2026). Additive: no type,

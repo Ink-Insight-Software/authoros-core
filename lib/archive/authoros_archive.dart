@@ -42,6 +42,7 @@ class AuthorOsArchiveContents {
     this.series = const [],
     this.sceneAuthorship = const [],
     this.cartographerDocuments = const [],
+    this.extensionDocuments = const [],
   });
 
   final ConnectedDomainSnapshot snapshot;
@@ -88,6 +89,41 @@ class AuthorOsArchiveContents {
   /// *"this project has no map"*.
   final List<Map<String, dynamic>> cartographerDocuments;
 
+  /// The per-project working layers that applications and expansions keep
+  /// beside a project's records: Language Forge's phonologies, scripts and
+  /// grammar formulas today, and every later sidecar of the same kind.
+  ///
+  /// Each entry is `{extension, projectId, document}`: which extension wrote
+  /// it, under a stable id such as `language-forge`; the project it belongs
+  /// to; and the document, exactly as the extension wrote it.
+  ///
+  /// Opaque here, like [cartographerDocuments], and for the same reason: the
+  /// document's model belongs to its extension, and the core reading it would
+  /// make the archive a second owner. One generic slot rather than one per
+  /// extension, so the next sidecar travels without a new archive entry, and
+  /// an archive carrying an extension this build has never heard of still
+  /// restores — the entry comes back for whoever knows it.
+  ///
+  /// Carried so that a project is one file. Before it, a world's backup,
+  /// restore, duplicate or import brought back every language record and lost
+  /// every rule the author had written about how those languages sound.
+  ///
+  /// Each entry must carry both `extension` and `projectId`: entries are
+  /// keyed and sorted by `"$extension:$projectId"`, so one without either
+  /// fails the export rather than landing somewhere unpredictable.
+  ///
+  /// Empty for an archive written before documents were carried — which a
+  /// restore must read as *"this file says nothing about this extension"*,
+  /// never as *"this project has no such work"*.
+  final List<Map<String, dynamic>> extensionDocuments;
+
+  /// The [extensionDocuments] one extension wrote, by project id.
+  Map<String, Object?> extensionDocumentsFor(String extension) => {
+        for (final entry in extensionDocuments)
+          if (entry['extension'] == extension && entry['projectId'] is String)
+            entry['projectId'] as String: entry['document'],
+      };
+
   /// Whether this archive carries a roster at all.
   bool get carriesRoster => projects.isNotEmpty;
 }
@@ -111,8 +147,12 @@ class AuthorOsArchiveService {
     Iterable<WritingSeries> series = const [],
     Iterable<Map<String, Object?>> sceneAuthorship = const [],
     Iterable<Map<String, Object?>> cartographerDocuments = const [],
+    Iterable<Map<String, Object?>> extensionDocuments = const [],
   }) {
     InMemoryConnectedDomainRepository(initial: snapshot);
+    final extensionLines = [
+      for (final entry in extensionDocuments) _extensionLine(entry),
+    ];
     final entries = <String, Uint8List>{
       'data/records.jsonl': _jsonLines(
         snapshot.records.map((record) => record.toJson()),
@@ -221,6 +261,12 @@ class AuthorOsArchiveService {
                 ...document,
               }),
         ),
+      // Every extension's per-project working layer, in one entry rather than
+      // one per extension. Written only when there is one, so an archive of a
+      // project no extension has touched stays byte-identical to one written
+      // before this entry existed.
+      if (extensionLines.isNotEmpty)
+        'data/extension-documents.jsonl': _jsonLines(extensionLines),
     };
     final contentFingerprint = _contentFingerprint(entries);
     final entryMetadata = [
@@ -459,6 +505,16 @@ class AuthorOsArchiveService {
           files.containsKey('data/cartographer-documents.jsonl')
               ? _decodeJsonLines(files['data/cartographer-documents.jsonl'])
               : const [],
+      // Optional on read, like every entry added after the first archives.
+      // The synthesised line `id` is dropped: it is the export's sort key,
+      // not part of what the extension wrote.
+      extensionDocuments: files.containsKey('data/extension-documents.jsonl')
+          ? [
+              for (final line in _decodeJsonLines(
+                  files['data/extension-documents.jsonl']))
+                {...line}..remove('id'),
+            ]
+          : const [],
     );
   }
 
@@ -474,6 +530,30 @@ class AuthorOsArchiveService {
     await commit(snapshot);
     return snapshot;
   }
+}
+
+/// One `data/extension-documents.jsonl` line, keyed `"$extension:$projectId"`.
+///
+/// Refuses an entry without either, as the doc on
+/// [AuthorOsArchiveContents.extensionDocuments] says: the key is what sorts
+/// the file, and a guessed key is a document restored into the wrong place.
+Map<String, Object?> _extensionLine(Map<String, Object?> entry) {
+  final extension = entry['extension'];
+  final projectId = entry['projectId'];
+  if (extension is! String || extension.trim().isEmpty) {
+    throw ArgumentError.value(
+        entry, 'extensionDocuments', 'An entry needs its extension.');
+  }
+  if (projectId is! String || projectId.trim().isEmpty) {
+    throw ArgumentError.value(
+        entry, 'extensionDocuments', 'An entry needs its projectId.');
+  }
+  return {
+    'id': '$extension:$projectId',
+    'extension': extension,
+    'projectId': projectId,
+    'document': entry['document'],
+  };
 }
 
 Uint8List _jsonLines(Iterable<Map<String, Object?>> values) {
@@ -542,6 +622,7 @@ String _roleFor(String path) => switch (path) {
       'data/revision-decisions.jsonl' => 'revision-decisions',
       'data/manuscripts.jsonl' => 'manuscripts',
       'data/cartographer-documents.jsonl' => 'cartographer-documents',
+      'data/extension-documents.jsonl' => 'extension-documents',
       'data/projects.jsonl' => 'projects',
       'data/series.jsonl' => 'series',
       'content/scene-prose.jsonl' => 'scene-content',
