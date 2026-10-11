@@ -5,7 +5,7 @@ description: >-
   Dart. AuthorOS Write and the standalone applications depend on it; none of
   them copies it.
 publish_to: none
-version: 0.15.0
+version: 0.16.0
 
 environment:
   sdk: ">=3.6.0 <4.0.0"
@@ -14,3 +14,9 @@ environment:
 dependencies:
   archive: ^4.0.9
   crypto: ^3.0.7
+
+# A dev dependency only: it never reaches an application's resolution. The
+# package's older tests still live in AOS-Write (README, "Releasing"); the
+# ones written for 0.16.0 test only this package, so they live here.
+dev_dependencies:
+  test: ^1.26.0
