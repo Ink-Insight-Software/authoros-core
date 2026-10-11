@@ -1,5 +1,26 @@
 # Changelog
 
+## 0.17.0
+
+For AOS Worldsmith's scenario workshop and its Observatory (October 11,
+2026). Additive: nothing is removed or renamed.
+
+- **`BranchService` and `TemplateEngine` moved here** from AuthorOS Write
+  (`lib/branch_service.dart`, `lib/template_engine.dart`), beside
+  `branch_domain.dart` and `branch_engine.dart`, so an application other
+  than AuthorOS Write can save a `whatIf` branch. Behaviour is unchanged;
+  one unused private helper was dropped. AuthorOS Write's old paths are
+  one-line exports of these.
+- **Nine more edges carry a consequence** in
+  `ConsequenceTraversal.defaultRules`: `ruledBy`, `occupies`, `signed`,
+  `requires`, `usedBy`, `uses`, `routeFrom`, `routeTo` and `practices`,
+  each the twin of an edge already ruled on. They were AOS Worldsmith's
+  `ObservatoryRules`, and keep its directions and words. A walk given the
+  default rules now reaches a treaty's signatories, a route's ends and a
+  resource's users.
+- **Tests** that every default rule names a built-in edge and that no edge
+  is ruled on twice (a second rule would silently replace the first).
+
 ## 0.16.0
 
 So the Linguist's Study can open in AOS Worldsmith without losing an

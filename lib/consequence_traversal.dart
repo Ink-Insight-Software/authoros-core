@@ -97,7 +97,9 @@ abstract final class ConsequenceTraversal {
   static const defaultMaxDepth = 4;
 
   /// The rules for the built-in edges a world's systems are joined by. An
-  /// edge with no rule carries nothing.
+  /// edge with no rule carries nothing. One rule per edge: a second would
+  /// silently replace the first, so `consequence_traversal_test.dart` holds
+  /// that none repeats, and that every edge named is a built-in one.
   static const defaultRules = <PropagationRule>[
     PropagationRule(edgeTypeId: 'governedBy', fromTarget: 'is governed by'),
     PropagationRule(edgeTypeId: 'rules', fromSource: 'is ruled by'),
@@ -128,6 +130,29 @@ abstract final class ConsequenceTraversal {
     // does not, by itself, change the people who hold it.
     PropagationRule(edgeTypeId: 'hasCulture'),
     PropagationRule(edgeTypeId: 'speaks'),
+
+    // Nine edges AOS Worldsmith's records suggest, each the twin of one ruled
+    // on above (moved here from Worldsmith's Observatory in 0.17.0, as it had
+    // them). Without them a walk stops at the first record: a treaty reaches
+    // nobody, because its signatories are joined to it by `signed`.
+    //
+    // A change to a ruler reaches what it rules: `rules`, from the other end.
+    PropagationRule(edgeTypeId: 'ruledBy', fromTarget: 'is ruled by'),
+    // A change to a land reaches the people who hold it.
+    PropagationRule(edgeTypeId: 'occupies', fromTarget: 'occupies'),
+    // A change to a treaty reaches those who signed it.
+    PropagationRule(edgeTypeId: 'signed', fromTarget: 'signed'),
+    // `dependsOn`, in the codex's word.
+    PropagationRule(edgeTypeId: 'requires', fromTarget: 'requires'),
+    // A change to a thing reaches those who use it, whichever end says so.
+    PropagationRule(edgeTypeId: 'usedBy', fromSource: 'uses'),
+    PropagationRule(edgeTypeId: 'uses', fromTarget: 'uses'),
+    // A change to a route reaches the places at its ends.
+    PropagationRule(edgeTypeId: 'routeFrom', fromSource: 'is where it begins'),
+    PropagationRule(edgeTypeId: 'routeTo', fromSource: 'is where it ends'),
+    // A change to a practice (a faith's rite, a magic) reaches its
+    // practitioners, as `worships` does.
+    PropagationRule(edgeTypeId: 'practices', fromTarget: 'practises'),
   ];
 
   /// Walks out from [changedId] through [links] among [records].
