@@ -2,8 +2,8 @@
 
 ## 0.18.0
 
-So AOS Worldsmith can delete a scenario the author discards, rather than
-archive it (October 16, 2026). **Breaking for implementers**: every
+Two changes (October 16, 2026). AOS Worldsmith can delete a scenario the author discards, rather than
+archive it, and AuthorOS Write can mount Language Forge. **Breaking for implementers**: every
 `ConnectedDomainRepository` must add one method. Nothing is removed or
 renamed.
 
@@ -15,6 +15,13 @@ renamed.
   refuses a branch that is not the project's, and a branch another branch
   descends from.
 - **Tests** for the service's refusals and its call through.
+- **`languageForgeEnabled`** in `build_flags.dart`, read from
+  `AOS_ENABLE_LANGUAGE_FORGE` (October 16, 2026). Const-shaped like the
+  other two flags and off by default, so AuthorOS Write can mount the
+  Linguist's Study as a page of the Story Codex and a build without the
+  define drops the room's code, words and address from its bundle. It gates
+  the room only; `lib/language_forge/` is unaffected. A test holds that each
+  flag reads its own define and stays a `const bool.fromEnvironment`.
 
 ## 0.17.0
 
