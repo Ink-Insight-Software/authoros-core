@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.18.0
+
+So AOS Worldsmith can delete a scenario the author discards, rather than
+archive it (October 16, 2026). **Breaking for implementers**: every
+`ConnectedDomainRepository` must add one method. Nothing is removed or
+renamed.
+
+- **`ConnectedDomainRepository.deleteBranch(branchId)`** removes a story
+  branch, its record and link overlays, and every version and audit event
+  filed under it, in one transaction, and returns how many rows went. Canon
+  and other branches are untouched.
+- **`BranchService.deleteBranch(branchId)`** is the way to call it. It
+  refuses a branch that is not the project's, and a branch another branch
+  descends from.
+- **Tests** for the service's refusals and its call through.
+
 ## 0.17.0
 
 For AOS Worldsmith's scenario workshop and its Observatory (October 11,

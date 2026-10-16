@@ -91,6 +91,23 @@ abstract interface class ConnectedDomainRepository {
     required AuditEvent auditEvent,
   });
 
+  /// Deletes the story branch [branchId] outright: the branch, every record
+  /// and link overlay it holds, and every version and audit event filed
+  /// under it (`branchId` on the history row). Added in 0.18.0, for a saved
+  /// scenario the author discards.
+  ///
+  /// Canon is untouched: no record, link, or canon version or audit event
+  /// is removed, and nor is any other branch or its history. A canon write
+  /// that names the branch only in its metadata (a promotion's
+  /// `historyMetadata`) is canon history and stays.
+  ///
+  /// One transaction, like [eraseProject]: half a branch would leave
+  /// overlays the engine cannot resolve. Callers go through
+  /// `BranchService.deleteBranch`, which refuses a branch another branch
+  /// descends from. Returns how many rows were removed; 0 for a branch the
+  /// store does not hold.
+  Future<int> deleteBranch(String branchId);
+
   Future<void> appendHistory(
     RecordVersion version,
     AuditEvent auditEvent,
