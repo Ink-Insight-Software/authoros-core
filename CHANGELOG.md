@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.19.0
+
+For Language Forge's speaker profiles (October 16, 2026). Additive: nothing
+is removed or renamed.
+
+- **`speaks` declares `fluency`, `literacy` and `accent`**, beside the Codex
+  metadata it already carried. Fluency is a single choice of Native, Fluent,
+  Conversational, Basic or Understands only; literacy of Reads and writes,
+  Reads only or Spoken only. Both accept the author's own word, as
+  `partnerOf`'s `union` does. Accent is short text. The Codex's `strength`
+  stays the relationship's, not the speaker's.
+- A `speaks` link without them validates as before, and no other Codex
+  relationship gains them. The archive carries link metadata as written, so
+  nothing there changes.
+- **Tests** for the declaration, an author's own word, an old link, and a
+  value of the wrong type.
+
 ## 0.18.0
 
 Two changes (October 16, 2026). AOS Worldsmith can delete a scenario the author discards, rather than

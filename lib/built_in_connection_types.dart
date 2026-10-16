@@ -658,6 +658,8 @@ class BuiltInConnectionTypes {
       'explainedIn': ('Explained in', 'Explains'),
       'foreshadowedIn': ('Foreshadowed in', 'Foreshadows'),
       'confirmedIn': ('Confirmed in', 'Confirms'),
+    }, extra: const {
+      'speaks': _speakerMetadata,
     }),
     ..._plotRelationships,
   ];
@@ -998,8 +1000,9 @@ const _timelineRelationshipMetadata = <RecordFieldDefinition>[
 ];
 
 Iterable<ConnectionTypeDefinition> _codexRelationships(
-  Map<String, (String, String)> definitions,
-) =>
+  Map<String, (String, String)> definitions, {
+  Map<String, List<RecordFieldDefinition>> extra = const {},
+}) =>
     definitions.entries.map(
       (entry) => ConnectionTypeDefinition(
         id: entry.key,
@@ -1010,7 +1013,10 @@ Iterable<ConnectionTypeDefinition> _codexRelationships(
         temporalSupport: true,
         builtIn: true,
         sourcePackId: 'authoros-codex-core',
-        metadataFields: _codexMetadataFields,
+        metadataFields: [
+          ..._codexMetadataFields,
+          ...?extra[entry.key],
+        ],
       ),
     );
 
@@ -1074,6 +1080,45 @@ const _codexMetadataFields = <RecordFieldDefinition>[
     label: 'Confidence',
     type: RecordFieldType.rating,
     order: 9,
+  ),
+];
+
+/// A speaker's command of a language, on `speaks` (October 16, 2026, for
+/// Language Forge's speaker profiles). The Codex's `strength` is the
+/// relationship's, not the speaker's, so fluency gets its own field.
+///
+/// Fluency and literacy are short closed ladders an app can sort and band,
+/// open to the author's own word as `union` is. Accent is the author's
+/// words: no list could name every way a person sounds. A `speaks` link
+/// without them is a speaker whose command is not recorded, as before.
+const _speakerMetadata = [
+  RecordFieldDefinition(
+    id: 'fluency',
+    label: 'Fluency',
+    type: RecordFieldType.singleChoice,
+    order: 20,
+    allowCustomValues: true,
+    options: [
+      'Native',
+      'Fluent',
+      'Conversational',
+      'Basic',
+      'Understands only',
+    ],
+  ),
+  RecordFieldDefinition(
+    id: 'literacy',
+    label: 'Literacy',
+    type: RecordFieldType.singleChoice,
+    order: 21,
+    allowCustomValues: true,
+    options: ['Reads and writes', 'Reads only', 'Spoken only'],
+  ),
+  RecordFieldDefinition(
+    id: 'accent',
+    label: 'Accent',
+    type: RecordFieldType.shortText,
+    order: 22,
   ),
 ];
 
