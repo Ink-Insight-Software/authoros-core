@@ -11,7 +11,8 @@ import 'version_audit_service.dart';
 
 /// Writes a project's story branches and their overlays, each with its
 /// version and audit event (moved from AuthorOS Write in 0.17.0, unchanged
-/// but for one unused private helper). A branch never writes canon: its
+/// but for one unused private helper), and deletes a branch with all of
+/// that (0.18.0). A branch never writes canon: its
 /// records and links are overlays [BranchEngine] resolves over the canon
 /// snapshot.
 class BranchService {
@@ -52,6 +53,29 @@ class BranchService {
       auditEvent: entry.audit,
     );
     return branch;
+  }
+
+  /// Deletes [branchId] from the project: the branch, its overlays and the
+  /// history filed under it (0.18.0). Canon is never touched.
+  ///
+  /// Archiving puts a branch away and keeps it; this is for a branch the
+  /// author wants gone, such as a discarded scenario. Refused with a
+  /// [StateError] when the branch is not this project's, or when another
+  /// branch descends from it, since that branch's lineage would then name
+  /// a branch that no longer exists. Returns how many rows went.
+  Future<int> deleteBranch(String branchId) async {
+    await _requireBranch(branchId);
+    final children = [
+      for (final branch in await repository.branchesByProject(projectId))
+        if (branch.parentBranchId == branchId) branch.name,
+    ];
+    if (children.isNotEmpty) {
+      throw StateError(
+        'Branch $branchId has branches of its own (${children.join(', ')}); '
+        'delete those first.',
+      );
+    }
+    return repository.deleteBranch(branchId);
   }
 
   Future<void> overrideRecord(

@@ -131,3 +131,29 @@ const politicsAndPowerEnabled =
 /// opens for everyone by design.
 const heartsAndTensionsEnabled =
     bool.fromEnvironment('AOS_ENABLE_HEARTS');
+
+/// Whether Language Forge — the Linguist's Study — exists in this build.
+///
+/// Off by default, for the reason every flag here is: the room is not
+/// finished, and the safe build is the one without it. Unlike the two rooms
+/// above it is not a section. It is a page of the Story Codex,
+/// `/linguists-study`, so in AuthorOS Write the flag guards the router's page
+/// lookup, the shell's Codex page, the entry-header button and the archive
+/// contributor's registration — and nothing else, because the Codex and every
+/// language record in it are free and stay exactly as they are in both builds.
+///
+/// ```
+/// flutter run   --dart-define=AOS_ENABLE_LANGUAGE_FORGE=true
+/// flutter test  --dart-define=AOS_ENABLE_LANGUAGE_FORGE=true
+/// flutter build web --release --dart-define=AOS_ENABLE_LANGUAGE_FORGE=true
+/// ```
+///
+/// It gates the room, never the model. `lib/language_forge/` is read by AOS
+/// Worldsmith whatever this flag says, and an author's Study layer in a backup
+/// is kept by a build without the room as an unclaimed extension document.
+///
+/// When the room is finished the flag is deleted rather than turned into the
+/// entitlement: AuthorOS Write's `language.construction` capability is already
+/// `soldBy` Worldsmith, and the Study already asks Worldsmith's door.
+const languageForgeEnabled =
+    bool.fromEnvironment('AOS_ENABLE_LANGUAGE_FORGE');
