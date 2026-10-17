@@ -1,5 +1,38 @@
 # Changelog
 
+## 0.20.0
+
+Reference attachments, and the archive carries attached files (October 16,
+2026). Additive: nothing is removed or renamed.
+
+- **`ResearchReferences`** (`research_reference.dart`). A reference picture
+  or PDF is a Research Studio entry (`research-entry`) of kind *Reference*,
+  with its file under the per-record asset role `reference`. Its caption,
+  notes, credit and source link are the entry's `summary`, `notes`,
+  `citation` and `sourceUrl`; no new record type and no new field. It
+  documents records through the existing `documents` connection, so one
+  file attached to several records is stored once. A reference is written
+  non-canon, and attaching one changes no field of the record it documents.
+  `sniff` reads JPEG, PNG, GIF, WebP and PDF from the file's own bytes;
+  `rejection` refuses an empty file, an unknown type, and anything over
+  10 MB, which is under the archive's 16 MB limit on one entry.
+- **`RecordAsset`** (`record_asset.dart`): one row of the per-record asset
+  table in transit, every role (avatar, voice, reference, and roles a later
+  build adds).
+- **The archive carries record assets.** `exportSnapshot(recordAssets:)`
+  writes `data/record-assets.jsonl` (one line per asset, keyed
+  `projectId|recordId|role`) and each file once under
+  `assets/sha256/<digest>`, with its own media type in the manifest.
+  `AuthorOsArchiveContents.recordAssets` reads them back, and a line whose
+  file is missing or altered fails the import. An archive without assets is
+  byte-identical to one written before; an older build reads a newer archive
+  and ignores the files. Export refuses two assets under one key and a file
+  larger than one archive entry may be. Until now no avatar, voice note or
+  attachment travelled in a backup.
+- `ArchiveInspection.attachedFiles` counts them, and the summary says so.
+- **Tests** for the round trip, content addressing, byte-identical output,
+  determinism, refusals, tampering, and the reference model.
+
 ## 0.19.0
 
 For Language Forge's speaker profiles (October 16, 2026). Additive: nothing

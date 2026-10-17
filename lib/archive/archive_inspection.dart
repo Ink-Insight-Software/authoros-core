@@ -23,6 +23,7 @@ ArchiveInspection inspectionOf(AuthorOsArchiveContents contents) {
     revisionDecisions: snapshot.revisionDecisions.length,
     projects: contents.projects.length,
     mappedProjects: contents.cartographerDocuments.length,
+    attachedFiles: contents.recordAssets.length,
   );
 }
 
@@ -37,6 +38,7 @@ class ArchiveInspection {
     this.revisionDecisions = 0,
     this.projects = 0,
     this.mappedProjects = 0,
+    this.attachedFiles = 0,
   });
 
   final int records;
@@ -60,6 +62,10 @@ class ArchiveInspection {
   /// a project had a map.
   final int mappedProjects;
 
+  /// Files attached to records: portraits, voice notes, reference pictures
+  /// and PDFs. Zero on the same terms as [projects].
+  final int attachedFiles;
+
   /// True when the archive parsed, every checksum matched, and it holds
   /// something. An archive that verifies but is empty is a real answer and not
   /// a good one, so the two are reported apart.
@@ -71,7 +77,8 @@ class ArchiveInspection {
       projects == 0 &&
       // Counted here too, so an archive holding a project's maps and nothing
       // else is not reported as holding nothing.
-      mappedProjects == 0;
+      mappedProjects == 0 &&
+      attachedFiles == 0;
 
   /// One line for a screen: what an author would get back.
   String get summary {
@@ -93,6 +100,9 @@ class ArchiveInspection {
       if (mappedProjects > 0)
         '$mappedProjects '
             '${_plural(mappedProjects, 'mapped project', 'mapped projects')}',
+      if (attachedFiles > 0)
+        '$attachedFiles attached '
+            '${_plural(attachedFiles, 'file', 'files')}',
     ];
     return parts.join(' · ');
   }

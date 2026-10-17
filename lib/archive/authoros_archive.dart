@@ -13,6 +13,7 @@ import '../version_audit.dart';
 import '../revision_decision.dart';
 import '../writing_session.dart';
 import '../project_roster_entry.dart';
+import '../record_asset.dart';
 import '../writing_series.dart';
 
 class AuthorOsArchiveLimits {
@@ -43,6 +44,7 @@ class AuthorOsArchiveContents {
     this.sceneAuthorship = const [],
     this.cartographerDocuments = const [],
     this.extensionDocuments = const [],
+    this.recordAssets = const [],
   });
 
   final ConnectedDomainSnapshot snapshot;
@@ -117,6 +119,26 @@ class AuthorOsArchiveContents {
   /// never as *"this project has no such work"*.
   final List<Map<String, dynamic>> extensionDocuments;
 
+  /// The files attached to records: avatars, voice notes, reference pictures
+  /// and PDFs, every role the per-record asset table holds, known or not.
+  ///
+  /// Carried so that a project is one file. Before it, a backup brought back
+  /// every record and lost every picture attached to one.
+  ///
+  /// Written as `data/record-assets.jsonl`, one line of description per asset
+  /// (`projectId|recordId|role` is its id, as it is the table's key), and the
+  /// bytes once each under `assets/sha256/<digest>`: content-addressed, so
+  /// one picture attached in two places travels once, and its digest is the
+  /// manifest's own integrity check.
+  ///
+  /// Empty for an archive written before assets were carried, which a
+  /// restore must read as *"this file says nothing about attachments"*,
+  /// never as *"there are none"* ([carriesRecordAssets]).
+  final List<RecordAsset> recordAssets;
+
+  /// Whether this archive says anything about attached files at all.
+  bool get carriesRecordAssets => recordAssets.isNotEmpty;
+
   /// The [extensionDocuments] one extension wrote, by project id.
   Map<String, Object?> extensionDocumentsFor(String extension) => {
         for (final entry in extensionDocuments)
@@ -148,11 +170,13 @@ class AuthorOsArchiveService {
     Iterable<Map<String, Object?>> sceneAuthorship = const [],
     Iterable<Map<String, Object?>> cartographerDocuments = const [],
     Iterable<Map<String, Object?>> extensionDocuments = const [],
+    Iterable<RecordAsset> recordAssets = const [],
   }) {
     InMemoryConnectedDomainRepository(initial: snapshot);
     final extensionLines = [
       for (final entry in extensionDocuments) _extensionLine(entry),
     ];
+    final assets = _recordAssetEntries(recordAssets, limits);
     final entries = <String, Uint8List>{
       'data/records.jsonl': _jsonLines(
         snapshot.records.map((record) => record.toJson()),
@@ -267,6 +291,13 @@ class AuthorOsArchiveService {
       // before this entry existed.
       if (extensionLines.isNotEmpty)
         'data/extension-documents.jsonl': _jsonLines(extensionLines),
+      // Attached files, described in data/ and held under assets/. Written
+      // only when there is one, so an archive of a project with no
+      // attachment stays byte-identical to one written before they travelled.
+      if (assets.lines.isNotEmpty)
+        'data/record-assets.jsonl': _jsonLines(assets.lines),
+      for (final digest in assets.blobs.keys.toList()..sort())
+        _assetPath(digest): assets.blobs[digest]!.bytes,
     };
     final contentFingerprint = _contentFingerprint(entries);
     final entryMetadata = [
@@ -274,10 +305,15 @@ class AuthorOsArchiveService {
         {
           'path': entry.key,
           'role': _roleFor(entry.key),
-          'mediaType': 'application/x-ndjson',
+          'mediaType': _isAssetPath(entry.key)
+              ? assets.blobs[entry.key.substring(_assetPrefix.length)]!
+                  .mediaType
+              : 'application/x-ndjson',
           'bytes': entry.value.length,
           'sha256': _digest(entry.value),
-          'recordCount': _lineCount(entry.value),
+          // A file is not lines.
+          if (!_isAssetPath(entry.key))
+            'recordCount': _lineCount(entry.value),
         },
     ]..sort((left, right) =>
         (left['path'] as String).compareTo(right['path'] as String));
@@ -515,6 +551,13 @@ class AuthorOsArchiveService {
                 {...line}..remove('id'),
             ]
           : const [],
+      recordAssets: files.containsKey('data/record-assets.jsonl')
+          ? [
+              for (final line
+                  in _decodeJsonLines(files['data/record-assets.jsonl']))
+                _recordAssetFrom(line, files),
+            ]
+          : const [],
     );
   }
 
@@ -554,6 +597,100 @@ Map<String, Object?> _extensionLine(Map<String, Object?> entry) {
     'projectId': projectId,
     'document': entry['document'],
   };
+}
+
+const _assetPrefix = 'assets/sha256/';
+
+String _assetPath(String digest) => '$_assetPrefix$digest';
+
+bool _isAssetPath(String path) => path.startsWith(_assetPrefix);
+
+/// The `data/record-assets.jsonl` lines for [assets], and their bytes once
+/// each by digest.
+///
+/// Refuses an asset without its project, record, role or type, two assets
+/// under one key, and a file larger than [limits] lets one entry be: this
+/// build could not read that archive back, so it is never written.
+({
+  List<Map<String, Object?>> lines,
+  Map<String, ({String mediaType, Uint8List bytes})> blobs,
+}) _recordAssetEntries(
+  Iterable<RecordAsset> assets,
+  AuthorOsArchiveLimits limits,
+) {
+  final lines = <Map<String, Object?>>[];
+  final blobs = <String, ({String mediaType, Uint8List bytes})>{};
+  final keys = <String>{};
+  // In key order, so the same assets give the same file whatever order they
+  // were handed over in.
+  final sorted = assets.toList()..sort((a, b) => a.key.compareTo(b.key));
+  for (final asset in sorted) {
+    for (final (name, value) in [
+      ('projectId', asset.projectId),
+      ('recordId', asset.recordId),
+      ('role', asset.role),
+      ('mediaType', asset.mediaType),
+    ]) {
+      if (value.trim().isEmpty) {
+        throw ArgumentError.value(
+            asset.key, 'recordAssets', 'An asset needs its $name.');
+      }
+    }
+    if (!keys.add(asset.key)) {
+      throw ArgumentError.value(
+          asset.key, 'recordAssets', 'Two assets share one key.');
+    }
+    if (asset.byteLength > limits.maximumEntryBytes) {
+      throw ArgumentError.value(asset.key, 'recordAssets',
+          'An asset is larger than an archive entry may be.');
+    }
+    final digest = _digest(asset.bytes);
+    blobs.putIfAbsent(
+      digest,
+      () => (mediaType: asset.mediaType, bytes: asset.bytes),
+    );
+    lines.add({
+      'id': asset.key,
+      'projectId': asset.projectId,
+      'recordId': asset.recordId,
+      'role': asset.role,
+      'mediaType': asset.mediaType,
+      'sha256': digest,
+      'bytes': asset.byteLength,
+      if (asset.width != null) 'width': asset.width,
+      if (asset.height != null) 'height': asset.height,
+      'updatedAt': asset.updatedAt.toUtc().toIso8601String(),
+      'extension': asset.extension,
+    });
+  }
+  return (lines: lines, blobs: blobs);
+}
+
+/// One asset read back: its line, and the bytes its digest names. A line
+/// whose bytes are missing, or the wrong length, fails the import, as any
+/// other entry that does not match its description does.
+RecordAsset _recordAssetFrom(
+  Map<String, dynamic> line,
+  Map<String, Uint8List> files,
+) {
+  final digest = line['sha256'];
+  final bytes = digest is String ? files[_assetPath(digest)] : null;
+  if (bytes == null || bytes.length != line['bytes']) {
+    throw FormatException('Record asset content is missing: ${line['id']}');
+  }
+  final extension = line['extension'];
+  return RecordAsset(
+    projectId: line['projectId'] as String,
+    recordId: line['recordId'] as String,
+    role: line['role'] as String,
+    mediaType: line['mediaType'] as String,
+    bytes: bytes,
+    width: line['width'] as int?,
+    height: line['height'] as int?,
+    updatedAt: DateTime.parse(line['updatedAt'] as String),
+    extension:
+        extension is Map ? Map<String, Object?>.from(extension) : const {},
+  );
 }
 
 Uint8List _jsonLines(Iterable<Map<String, Object?>> values) {
@@ -618,6 +755,8 @@ int _lineCount(Uint8List bytes) =>
     const LineSplitter().convert(utf8.decode(bytes)).length;
 
 String _roleFor(String path) => switch (path) {
+      _ when _isAssetPath(path) => 'record-asset-content',
+      'data/record-assets.jsonl' => 'record-assets',
       'data/writing-sessions.jsonl' => 'writing-sessions',
       'data/revision-decisions.jsonl' => 'revision-decisions',
       'data/manuscripts.jsonl' => 'manuscripts',
