@@ -379,6 +379,22 @@ const _titleSuccession = RecordOptionSet(
   ],
 );
 
+/// How a title's current holder came to hold it (October 21, 2026). Open to
+/// the author's own word, as the succession rule is.
+const _titleHolding = RecordOptionSet(
+  id: 'title-holding',
+  name: 'Held through',
+  description: 'How the current holder came to hold a title.',
+  values: [
+    'Inheritance',
+    'Grant',
+    'Marriage',
+    'Election',
+    'Conquest',
+    'Usurpation',
+  ],
+);
+
 /// A dignity a family holds and passes: its rank, who holds it now, and the
 /// rule it passes by.
 final _title = RecordTypeDefinition(
@@ -389,7 +405,7 @@ final _title = RecordTypeDefinition(
   icon: 'workspace_premium',
   categoryId: 'factions',
   baseTypeId: 'general-lore',
-  optionSets: const [_titleSuccession],
+  optionSets: const [_titleSuccession, _titleHolding],
   fields: [
     _detail('rank', 'Rank', RecordFieldType.shortText, 200,
         description: 'Duke, khan, margravine, high priestess of the third '
@@ -410,6 +426,23 @@ final _title = RecordTypeDefinition(
         referenceTypeIds: const [BloodlineRecordTypes.estateTypeId],
         description: 'What it holds on the ground, if anything. Some titles '
             'are only a name.'),
+    // How and since when the current holder holds it, and who rules for
+    // them (October 21, 2026, authoros-core 0.21.0). A usurper is a holder
+    // whose title is held through *Usurpation*; a regent is never the
+    // holder. Nothing here is a second holder field.
+    _detail('heldThrough', 'Held through', RecordFieldType.singleChoice, 204,
+        optionSetId: 'title-holding',
+        allowCustomValues: true,
+        description: 'How the current holder came to hold it.'),
+    _detail('heldSince', 'Held since', RecordFieldType.shortText, 205,
+        description: 'When the current holder took it, in the world\'s '
+            'reckoning.'),
+    _detail('regent', 'Regent', RecordFieldType.recordReference, 206,
+        referenceTypeIds: const ['character'],
+        description: 'Who rules it for the holder while they cannot: a '
+            'child, an absence, an illness. A regent does not hold it.'),
+    _detail('regency', 'Regency', RecordFieldType.shortText, 207,
+        description: 'Why, since when and until when.'),
     _detail('succession', 'Passes by', RecordFieldType.singleChoice, 210,
         optionSetId: 'title-succession', allowCustomValues: true),
     _detail('successor', 'Heir', RecordFieldType.recordReference, 211,
@@ -434,7 +467,16 @@ final _title = RecordTypeDefinition(
       id: 'title-dignity',
       title: 'The dignity',
       order: 20,
-      fieldIds: ['rank', 'holder', 'house', 'estate'],
+      fieldIds: [
+        'rank',
+        'holder',
+        'heldThrough',
+        'heldSince',
+        'regent',
+        'regency',
+        'house',
+        'estate',
+      ],
     ),
     RecordTemplateSection(
       id: 'title-succession',
@@ -449,8 +491,9 @@ final _title = RecordTypeDefinition(
       fieldIds: ['grantedBy', 'created', 'style', 'precedence'],
     ),
   ],
-  suggestedLinkTypeIds: const ['belongsTo', 'associatedWith'],
-  templateVersion: 1,
+  suggestedLinkTypeIds: const ['belongsTo', 'associatedWith', 'claims'],
+  // 2 since October 21, 2026: how it is held, and its regent.
+  templateVersion: 2,
   builtIn: true,
   sourcePackId: 'authoros-bloodlines-system',
   permissions: const {'editableDefinition': false},
