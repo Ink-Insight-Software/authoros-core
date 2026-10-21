@@ -231,6 +231,22 @@ class BuiltInConnectionTypes {
       builtIn: true,
       sourcePackId: 'authoros-law-and-war-system',
     ),
+    // `claims`: a person's claim to a title or an office (October 21, 2026,
+    // authoros-core 0.21.0, for AOS Worldsmith's Ancestry Room). A title's
+    // `contested` is prose; a claim that names its claimant is this link, so
+    // a claim can be renounced or excluded on a date and still be on record.
+    // Time-bounded: a claim is made, and it lapses or is given up.
+    ConnectionTypeDefinition(
+      id: 'claims',
+      displayName: 'Claims',
+      sourceTypeIds: const ['character'],
+      targetTypeIds: const ['title', 'political-office'],
+      inverseLabel: 'Claimed by',
+      temporalSupport: true,
+      metadataFields: [..._timeBoundedMetadata, ..._claimMetadata],
+      builtIn: true,
+      sourcePackId: 'authoros-bloodlines-system',
+    ),
     const ConnectionTypeDefinition(
       id: 'locatedIn',
       displayName: 'Located in',
@@ -1119,6 +1135,28 @@ const _speakerMetadata = [
     label: 'Accent',
     type: RecordFieldType.shortText,
     order: 22,
+  ),
+];
+
+/// Where a claim stands, and what it rests on (October 21, 2026, for
+/// `claims`). *Renounced* is given up by the claimant; *Excluded* is barred
+/// by law, decree or the family. A claim with no standing recorded is a
+/// claim, nothing more. `basis` is the author's words: descent through a
+/// mother, a will, a conquest, a prophecy.
+const _claimMetadata = [
+  RecordFieldDefinition(
+    id: 'standing',
+    label: 'Standing',
+    type: RecordFieldType.singleChoice,
+    order: 20,
+    allowCustomValues: true,
+    options: ['Pressed', 'Renounced', 'Excluded'],
+  ),
+  RecordFieldDefinition(
+    id: 'basis',
+    label: 'Rests on',
+    type: RecordFieldType.shortText,
+    order: 21,
   ),
 ];
 

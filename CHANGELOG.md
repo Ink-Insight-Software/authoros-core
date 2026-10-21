@@ -1,5 +1,26 @@
 # Changelog
 
+## 0.21.0
+
+Claims, regents and usurpers, for AOS Worldsmith's Ancestry Room (October
+21, 2026). Additive: nothing is removed or renamed, and a title or link
+written before reads as it did.
+
+- **`claims`**, a new connection from a `character` to a `title` or a
+  `political-office`: a claim that names its claimant, where a title's
+  `contested` was prose only. Time-bounded (`startDate`, `endDate`), with
+  `standing` (*Pressed*, *Renounced*, *Excluded*, or the author's own word)
+  and `basis`, what the claim rests on, in the author's words. A claim with
+  no standing is a claim, nothing more. Pack `authoros-bloodlines-system`.
+- **`title` gains four fields** in *The dignity*: `heldThrough` (option set
+  `title-holding`: Inheritance, Grant, Marriage, Election, Conquest,
+  Usurpation, open to the author's word), `heldSince`, `regent` (a
+  character) and `regency` (why, since when, until when). A usurper is a
+  holder whose title is held through *Usurpation*; a regent rules for the
+  holder and is never a second holder. `templateVersion` moves to 2, and
+  `claims` joins its suggested links.
+- **Tests** in `test/claims_and_holding_test.dart`.
+
 ## 0.20.0
 
 Reference attachments, and the archive carries attached files (October 16,
