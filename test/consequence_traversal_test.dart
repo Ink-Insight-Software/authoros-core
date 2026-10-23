@@ -1,6 +1,7 @@
 import 'package:authoros_core/built_in_connection_types.dart';
 import 'package:authoros_core/connected_domain.dart';
 import 'package:authoros_core/consequence_traversal.dart';
+import 'package:authoros_core/link_span.dart';
 import 'package:test/test.dart';
 
 final _at = DateTime.utc(2026, 10, 11);
@@ -42,6 +43,8 @@ List<String> _reached(
     ];
 
 void main() {
+  group('as of a moment', _asOf);
+
   test('one rule per edge, so no rule silently overrides another', () {
     final ids = [
       for (final rule in ConsequenceTraversal.defaultRules) rule.edgeTypeId,
@@ -138,5 +141,110 @@ void main() {
     expect(_reached('rite', records, links), [
       'The Ember Rite → Keepers (practises)',
     ]);
+  });
+}
+
+class _Year implements LinkMoment {
+  const _Year(this.year);
+
+  final int year;
+
+  @override
+  int? place(Object written) => int.tryParse('$written')?.compareTo(year);
+}
+
+RecordLink _dated(
+  String id,
+  String source,
+  String type,
+  String target,
+  Map<String, Object?> metadata,
+) =>
+    RecordLink(
+      id: id,
+      sourceId: source,
+      targetId: target,
+      typeId: type,
+      scopeId: 'world',
+      direction: type == 'alliedWith' || type == 'atWarWith'
+          ? RecordLinkDirection.undirected
+          : RecordLinkDirection.directed,
+      createdAt: _at,
+      updatedAt: _at,
+      metadata: metadata,
+    );
+
+void _asOf() {
+  final records = [
+    _r('crown', 'government', 'The Ember Crown'),
+    _r('reach', 'government', 'The Reach'),
+    _r('vale', 'government', 'The Vale'),
+    _r('guild', 'faction', 'Saltwrights'),
+    _r('lena', 'character', 'Lena'),
+  ];
+  final links = [
+    // Allied 1180 to 1190: over by 1201.
+    _dated('l1', 'crown', 'alliedWith', 'reach',
+        {'beginning': '1180', 'ending': '1190'}),
+    // At war from 1195, with no end: holds in 1201.
+    _dated('l2', 'crown', 'atWarWith', 'vale', {'startDate': '1195'}),
+    // She left in 1199.
+    _dated('l3', 'lena', 'memberOf', 'guild', {'leftDate': '1199'}),
+    _dated('l4', 'guild', 'governedBy', 'crown', const {}),
+    // An end nobody can place: can't tell, so it is walked.
+    _dated('l5', 'reach', 'governedBy', 'crown', const {
+      'endDate': 'after the concord',
+    }),
+  ];
+
+  test('without a moment, every link is walked, as before', () {
+    final report = ConsequenceTraversal.traverse(
+      changedId: 'crown',
+      records: records,
+      links: links,
+    );
+    expect(
+      [for (final reach in report.reached) reach.record.id],
+      ['guild', 'reach', 'vale', 'lena'],
+    );
+    expect(report.passedOver, isEmpty);
+  });
+
+  test('as of a year, ended and later links carry nothing', () {
+    final report = ConsequenceTraversal.traverse(
+      changedId: 'crown',
+      records: records,
+      links: links,
+      asOf: const _Year(1201),
+    );
+    expect([for (final reach in report.reached) reach.explanation], [
+      'The Ember Crown → Saltwrights (is governed by)',
+      'The Ember Crown → The Reach (is governed by)',
+      'The Ember Crown → The Vale (is at war with)',
+    ]);
+    expect(
+      [for (final p in report.passedOver) (p.link.id, p.from.id, p.standing)],
+      [
+        ('l1', 'crown', LinkStanding.ended),
+        ('l3', 'guild', LinkStanding.ended),
+      ],
+    );
+  });
+
+  test('as of an earlier year, the war had not begun and she was a member',
+      () {
+    final report = ConsequenceTraversal.traverse(
+      changedId: 'crown',
+      records: records,
+      links: links,
+      asOf: const _Year(1185),
+    );
+    expect(report.reachOf('vale'), isNull);
+    expect(report.reachOf('reach')!.path.single.link.id, 'l1');
+    expect(report.reachOf('lena')!.depth, 2);
+    expect(
+      [for (final p in report.passedOver) (p.link.id, p.standing)],
+      [('l2', LinkStanding.notYet)],
+    );
   });
 }

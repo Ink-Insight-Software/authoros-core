@@ -11,9 +11,20 @@
 /// It is deterministic and invents nothing (Lock 8): no weights, no
 /// likelihoods, no simulation. It reads records and links and returns a
 /// list; it writes nothing, so running it can never change canon.
+///
+/// ## Now, or then
+///
+/// By default every link is walked, ended or not, as it always was. Given an
+/// `asOf` moment (0.22.0), a link that ended before it, or began after it,
+/// carries nothing: an alliance broken in 1190 does not carry a change in
+/// 1201. A link whose dates the moment cannot place still carries, because
+/// an unreadable date is *can't tell*, not *over* (`link_span.dart`). The
+/// links set aside next to the records the walk reached are listed in
+/// [ConsequenceReport.passedOver], so a reader can say what it left out.
 library;
 
 import 'connected_domain.dart';
+import 'link_span.dart';
 
 /// How a change crosses one kind of edge.
 class PropagationRule {
@@ -71,14 +82,42 @@ class ConsequenceReach {
       ].join(' → ');
 }
 
+/// A link the walk would have crossed, set aside because it did not hold
+/// at the moment asked about.
+class ConsequencePassedOver {
+  const ConsequencePassedOver({
+    required this.link,
+    required this.from,
+    required this.standing,
+  });
+
+  final RecordLink link;
+
+  /// The record the walk had reached, at the near end of [link].
+  final AuthorRecord from;
+
+  /// [LinkStanding.ended] or [LinkStanding.notYet].
+  final LinkStanding standing;
+}
+
 /// What a change reaches.
 class ConsequenceReport {
-  const ConsequenceReport({required this.changed, required this.reached});
+  const ConsequenceReport({
+    required this.changed,
+    required this.reached,
+    this.passedOver = const [],
+  });
 
   final AuthorRecord changed;
 
   /// Nearest first, then by title.
   final List<ConsequenceReach> reached;
+
+  /// With an `asOf`, the links the walk would have crossed from the changed
+  /// record or a record it went on from, set aside because they had ended or
+  /// not begun, in the order the walk met them. Each link once. Always empty
+  /// without an `asOf`.
+  final List<ConsequencePassedOver> passedOver;
 
   bool get isEmpty => reached.isEmpty;
 
@@ -160,12 +199,16 @@ abstract final class ConsequenceTraversal {
   /// Breadth first, links in id order, so the path reported for each record
   /// is the shortest, and the same world always gives the same answer.
   /// Put-away records are neither reached nor walked through.
+  ///
+  /// With [asOf], only links that held at that moment are walked (the
+  /// library comment says what *held* means). Without it, every link is.
   static ConsequenceReport traverse({
     required String changedId,
     required List<AuthorRecord> records,
     required List<RecordLink> links,
     List<PropagationRule> rules = defaultRules,
     int maxDepth = defaultMaxDepth,
+    LinkMoment? asOf,
   }) {
     final byId = {
       for (final r in records)
@@ -179,6 +222,8 @@ abstract final class ConsequenceTraversal {
 
     // Record id -> the steps that leave it.
     final out = <String, List<(RecordLink, String, String)>>{};
+    // Record id -> the links that would leave it, set aside at [asOf].
+    final aside = <String, List<(RecordLink, LinkStanding)>>{};
     for (final link in [...links]..sort((a, b) => a.id.compareTo(b.id))) {
       final rule = ruleOf[link.typeId];
       if (rule == null || !rule.propagates) continue;
@@ -187,28 +232,50 @@ abstract final class ConsequenceTraversal {
           link.sourceId == link.targetId) {
         continue;
       }
+      // Whether it held at [asOf]; walked unless a placed date proves not.
+      final standing =
+          asOf == null ? LinkStanding.holds : LinkSpanText.of(link).at(asOf);
+      void leave(String from, String to, String reason) {
+        if (standing.counts) {
+          out.putIfAbsent(from, () => []).add((link, to, reason));
+        } else {
+          aside.putIfAbsent(from, () => []).add((link, standing));
+        }
+      }
+
       final undirected = link.direction == RecordLinkDirection.undirected;
       if (rule.fromSource.isNotEmpty || undirected) {
-        final reason =
-            rule.fromSource.isNotEmpty ? rule.fromSource : rule.fromTarget;
-        out
-            .putIfAbsent(link.sourceId, () => [])
-            .add((link, link.targetId, reason));
+        leave(
+          link.sourceId,
+          link.targetId,
+          rule.fromSource.isNotEmpty ? rule.fromSource : rule.fromTarget,
+        );
       }
       if (rule.fromTarget.isNotEmpty || undirected) {
-        final reason =
-            rule.fromTarget.isNotEmpty ? rule.fromTarget : rule.fromSource;
-        out
-            .putIfAbsent(link.targetId, () => [])
-            .add((link, link.sourceId, reason));
+        leave(
+          link.targetId,
+          link.sourceId,
+          rule.fromTarget.isNotEmpty ? rule.fromTarget : rule.fromSource,
+        );
       }
     }
 
     final paths = <String, List<ConsequenceStep>>{changedId: const []};
+    final passedOver = <ConsequencePassedOver>[];
+    final setAside = <String>{};
     var frontier = [changedId];
     for (var depth = 0; depth < maxDepth && frontier.isNotEmpty; depth++) {
       final next = <String>[];
       for (final id in frontier) {
+        for (final (link, standing)
+            in aside[id] ?? const <(RecordLink, LinkStanding)>[]) {
+          if (!setAside.add(link.id)) continue;
+          passedOver.add(ConsequencePassedOver(
+            link: link,
+            from: byId[id]!,
+            standing: standing,
+          ));
+        }
         for (final (link, to, reason)
             in out[id] ?? const <(RecordLink, String, String)>[]) {
           if (paths.containsKey(to)) continue;
@@ -237,6 +304,10 @@ abstract final class ConsequenceTraversal {
             .toLowerCase()
             .compareTo(b.record.title.toLowerCase());
       });
-    return ConsequenceReport(changed: changed, reached: reached);
+    return ConsequenceReport(
+      changed: changed,
+      reached: reached,
+      passedOver: passedOver,
+    );
   }
 }

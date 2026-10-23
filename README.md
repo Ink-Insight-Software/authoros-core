@@ -44,9 +44,11 @@ credential to fetch it. A tag works too, but both applications pin commits.
 
 - The moved files' doc comments link to `../../docs/...` in AOS-Write. Those
   links do not resolve here; the documents stay in AOS-Write.
-- `dart analyze` reports two unused declarations in
-  `built_in_record_types.dart` (`_world`, `_location`). They came with the
-  move and are left as they were.
+- `dart analyze` reports an unused declaration in
+  `built_in_record_types.dart` (`_location`). It came with the move and is
+  left as it was. The other, `_world`, was deleted in 0.22.0: it held the only
+  declaration of `world.currentEra`, which no build ever offered, and the
+  field now lives on the registered `world`.
 - The package's tests still live in AOS-Write, which reads its source. Moving
   the ones that test only this package is follow-up work.
 

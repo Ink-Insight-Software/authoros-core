@@ -202,6 +202,32 @@ class ConnectionTypeDefinition {
     ),
   ];
 
+  /// Which metadata key says a link **began**, and which says it **ended**,
+  /// for every time-bounded edge: the one place that says so.
+  ///
+  /// Three families, named in [resolvedMetadataFields]: the standard pair
+  /// ([timeBoundedMetadataFields]), the character relationships' and
+  /// `memberOf`'s. Before 0.22.0 each reader carried its own copy of this
+  /// list, and one of them (AOS Worldsmith's) knew two of the three.
+  /// `link_span_test.dart` holds that every date a built-in edge carries is
+  /// one half of exactly one pair here, so a fourth family cannot be added
+  /// without saying which key ends it.
+  static const spanKeyPairs = <(String, String)>[
+    ('startDate', 'endDate'),
+    ('beginning', 'ending'),
+    ('joinedDate', 'leftDate'),
+  ];
+
+  /// This edge's `(start, end)` keys from [spanKeyPairs], or null when it
+  /// carries neither half of any pair.
+  (String, String)? get spanKeys {
+    final keys = temporalMetadataKeys;
+    for (final pair in spanKeyPairs) {
+      if (keys.contains(pair.$1) || keys.contains(pair.$2)) return pair;
+    }
+    return null;
+  }
+
   bool permits(String sourceTypeId, String targetTypeId) =>
       _permitsType(permittedSourceTypeIds, sourceTypeId) &&
       _permitsType(permittedTargetTypeIds, targetTypeId);

@@ -1,5 +1,45 @@
 # Changelog
 
+## 0.22.0
+
+The three gaps AOS Worldsmith's Phase 2 audit of the world model found
+(October 23, 2026). Additive: nothing public is removed or renamed, and a record or
+link written before reads as it did.
+
+- **`institution` is a faction.** It was a bare `general-lore` child with no
+  fields, filed under *factions*, so `memberOf` could not reach it. It now
+  inherits `faction`, as `military-unit` and `court` do, with three fields of
+  its own in *The institution*: `charter` (what it was founded on and may
+  do), `jurisdiction` (where its authority runs) and `answersTo` (whom it
+  reports to under its charter). A faction's `purpose` stays the place for
+  its aims. Template version 2; still pack `authoros-core`, still claimed by
+  no system. A record keeps its type id, never its parent, so an institution
+  stored under 0.21.0 resolves the new template and keeps every value; it is
+  template version 1, which validation accepts. `BuiltInRecordTypes.institutionTypeId`
+  names it. Tests in `test/institution_test.dart`.
+- **Current and historical links.**
+  - `ConnectionTypeDefinition.spanKeyPairs` declares, once, which metadata
+    key starts and which ends each time-bounded edge: `startDate`/`endDate`,
+    `beginning`/`ending`, `joinedDate`/`leftDate`. `spanKeys` gives an edge's
+    pair. A test holds that every date a built-in edge carries is half of
+    exactly one pair.
+  - `link_span.dart`: `LinkSpanText.of(link)` reads a link's start and end as
+    written, and `.at(moment)` says whether it `holds`, had `ended`, had
+    `notYet` begun, or `cannotTell`. The moment is a `LinkMoment` the caller
+    supplies, because the core does not read free-text dates: each
+    application has its world's calendars and its own reader. An unplaceable
+    date is *can't tell*, and can't tell counts as holding.
+  - `ConsequenceTraversal.traverse` takes an optional `asOf`. Without it,
+    nothing changes. With it, a link that had ended or not begun carries
+    nothing, and `ConsequenceReport.passedOver` lists those the walk set
+    aside. Tests in `test/link_span_test.dart` and
+    `test/consequence_traversal_test.dart`.
+- **`world.currentEra` is live.** 0.15.0 declared it on a second `world` in
+  `built_in_record_types.dart` that was never registered, so no build ever
+  offered it. It is on the registered `world` (`world_record_types.dart`,
+  section *Society*) and that template moves to version 2. The dead
+  definition is deleted. Tests in `test/world_current_era_test.dart`.
+
 ## 0.21.0
 
 Claims, regents and usurpers, for AOS Worldsmith's Ancestry Room (October

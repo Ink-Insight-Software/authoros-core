@@ -395,6 +395,19 @@ const _world = RecordTypeDefinition(
     ..._identityFields,
     ..._environmentFields,
     ..._societyFields,
+    // Which era is *now*, said by the author rather than guessed from the
+    // eras' order (AOS Worldsmith's Hall reads and sets it). Declared since
+    // 0.15.0 on a second `world` in `built_in_record_types.dart` that was
+    // never registered, so no build ever offered it; moved here in 0.22.0.
+    // On `world` alone: a location has no "now" of its own.
+    RecordFieldDefinition(
+      id: 'currentEra',
+      label: 'Current era',
+      type: RecordFieldType.recordReference,
+      order: 214,
+      description: 'The era the story\'s present stands in.',
+      referenceTypeIds: ['timeline-era', 'timeline-historical-period'],
+    ),
     ..._worldGridFields,
   ],
   sections: [
@@ -453,10 +466,13 @@ const _world = RecordTypeDefinition(
           'laws',
           'customs',
           'history',
+          'currentEra',
           'secrets'
         ]),
   ],
   suggestedLinkTypeIds: ['contains', 'locatedIn', 'associatedWith'],
+  // 2 since 0.22.0: `currentEra`.
+  templateVersion: 2,
   builtIn: true,
   sourcePackId: 'authoros-world-core',
   extensionData: {'worldDomain': true, 'worldTemplate': true},
