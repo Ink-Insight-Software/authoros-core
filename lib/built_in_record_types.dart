@@ -38,6 +38,10 @@ import 'build_flags.dart';
 class BuiltInRecordTypes {
   const BuiltInRecordTypes._();
 
+  /// A body that holds authority under a charter; a `faction` child since
+  /// 0.22.0 (see `_institution`).
+  static const institutionTypeId = 'institution';
+
   /// The item family: a **thing**, as opposed to a place.
   ///
   /// Derived from [definitions] rather than listed, because it is already
@@ -102,9 +106,9 @@ class BuiltInRecordTypes {
       'company': ('Company', 'factions', 'faction'),
       'military-unit': ('Military Unit', 'factions', 'faction'),
     }),
+    _institution,
     ..._children(const {
       'technology': ('Technology', 'technology'),
-      'institution': ('Institution', 'factions'),
       'profession': ('Profession', 'characters'),
       'person': ('Person', 'characters'),
       'historical-figure': ('Historical Figure', 'characters'),
@@ -318,64 +322,6 @@ final _generalLore = RecordTypeDefinition(
   sourcePackId: 'authoros-core',
   permissions: {'editableDefinition': false},
   exportBehavior: {'includeStructuredFields': true},
-);
-
-const _world = RecordTypeDefinition(
-  id: 'world',
-  name: 'World',
-  description: 'A canonical world shared with World Studio.',
-  icon: 'public',
-  categoryId: 'world',
-  baseTypeId: 'general-lore',
-  fields: [
-    RecordFieldDefinition(
-      id: 'geography',
-      label: 'Geography',
-      type: RecordFieldType.longText,
-      order: 100,
-    ),
-    RecordFieldDefinition(
-      id: 'politics',
-      label: 'Politics',
-      type: RecordFieldType.longText,
-      order: 101,
-    ),
-    RecordFieldDefinition(
-      id: 'economy',
-      label: 'Economy',
-      type: RecordFieldType.longText,
-      order: 102,
-    ),
-    RecordFieldDefinition(
-      id: 'history',
-      label: 'History',
-      type: RecordFieldType.longText,
-      order: 103,
-    ),
-    // Which era is *now*, said by the author rather than guessed from the
-    // eras' order (AOS Worldsmith's Hall reads it; October 10, 2026).
-    RecordFieldDefinition(
-      id: 'currentEra',
-      label: 'Current era',
-      type: RecordFieldType.recordReference,
-      order: 104,
-      referenceTypeIds: ['timeline-era', 'timeline-historical-period'],
-    ),
-  ],
-  sections: [
-    RecordTemplateSection(
-      id: 'worldbuilding',
-      title: 'Worldbuilding',
-      order: 10,
-      fieldIds: ['geography', 'politics', 'economy', 'history', 'currentEra'],
-    ),
-  ],
-  suggestedLinkTypeIds: ['contains', 'governedBy'],
-  // 2 since October 10, 2026: `currentEra`.
-  templateVersion: 2,
-  builtIn: true,
-  sourcePackId: 'authoros-core',
-  permissions: {'editableDefinition': false},
 );
 
 final _location = _deepTemplate(
@@ -615,6 +561,101 @@ final _material = _deepTemplate(
     'requires',
     'associatedWith',
   ],
+);
+
+/// A body that holds authority under a charter: a parliament, a university,
+/// a bank, a guild court, an academy of magic (0.22.0).
+///
+/// It was a bare child of `general-lore` with no fields, filed under
+/// *factions* but with none of a faction's, so `memberOf` could not reach it.
+/// It is a faction now, as `military-unit`, `court` and `religious-order`
+/// are: it has members, leadership and a hierarchy, and inherits the
+/// faction's fields and edges. It adds only what a faction cannot say: what
+/// it was founded on, where its authority runs, and whom it answers to.
+/// *Purpose* stays the faction's field, so an institution's aims are written
+/// once.
+///
+/// **A record stored before reads unchanged.** A record keeps its type id,
+/// never its parent: the parent is read from this registry each time, so an
+/// `institution` written under 0.21.0 now resolves the faction's fields and
+/// keeps every value it had (they were all `general-lore` fields, which a
+/// faction has too). Its template version was 1; the template's is 2, and
+/// validation refuses only a record *newer* than its template.
+/// `institution_test.dart` holds both.
+///
+/// It stays in `authoros-core`'s pack and unclaimed by any system:
+/// `GovernmentRecordTypes.reservedForOtherSystems` explains why a parliament
+/// and a bank should not have one owner.
+final _institution = RecordTypeDefinition(
+  id: BuiltInRecordTypes.institutionTypeId,
+  name: 'Institution',
+  description: 'A body that holds authority under a charter: a parliament, a '
+      'university, a bank, an academy.',
+  icon: 'account_balance',
+  categoryId: 'factions',
+  baseTypeId: 'faction',
+  fields: const [
+    RecordFieldDefinition(
+      id: 'charter',
+      label: 'Charter',
+      type: RecordFieldType.richText,
+      order: 220,
+      description: 'What it was founded on and what it may do: the charter, '
+          'the statute, the oath or the custom it stands on.',
+      extensionData: {'visibility': 'default', 'templateOwned': true},
+    ),
+    RecordFieldDefinition(
+      id: 'jurisdiction',
+      label: 'Where its authority runs',
+      type: RecordFieldType.recordReference,
+      order: 221,
+      referenceTypeIds: [
+        'government',
+        'country',
+        'nation',
+        'region',
+        'city',
+        'settlement',
+        'civilisation',
+      ],
+      quickCreateVisible: true,
+      extensionData: {'visibility': 'default', 'templateOwned': true},
+    ),
+    RecordFieldDefinition(
+      id: 'answersTo',
+      label: 'Answers to',
+      type: RecordFieldType.recordReference,
+      order: 222,
+      description: 'Whom it reports to under its charter. Whose side it is '
+          'on in fact is its allegiance, which may differ.',
+      referenceTypeIds: [
+        'government',
+        'political-office',
+        'institution',
+        'faction',
+        'religion',
+        'character',
+      ],
+      extensionData: {'visibility': 'default', 'templateOwned': true},
+    ),
+  ],
+  sections: const [
+    RecordTemplateSection(
+      id: 'institution',
+      title: 'The institution',
+      order: 20,
+      fieldIds: ['charter', 'jurisdiction', 'answersTo'],
+    ),
+  ],
+  suggestedLinkTypeIds: const ['memberOf', 'governedBy', 'associatedWith'],
+  // 2 since 0.22.0: a faction child with fields of its own. Version 1 was the
+  // bare `general-lore` child.
+  templateVersion: 2,
+  builtIn: true,
+  sourcePackId: 'authoros-core',
+  permissions: const {'editableDefinition': false},
+  exportBehavior: const {'includeStructuredFields': true},
+  extensionData: const {'codexTemplate': true, 'supportsSimpleMode': true},
 );
 
 final _item = _deepTemplate(
