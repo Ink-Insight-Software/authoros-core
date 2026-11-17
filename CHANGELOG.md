@@ -1,5 +1,34 @@
 # Changelog
 
+## 0.23.0
+
+AuthorOS Write 3.0's bundles (the owner, November 16, 2026). Additive: no
+value is removed or renamed, no wire id changes, and an entitlement stored
+before reads and writes as it did.
+
+- **Three new products**, in `entitlement.dart`: `aosWorldbuilding`
+  (`aos-worldbuilding`), `aosRevisePublish` (`aos-revise-publish`) and
+  `aosStudioPlus` (`aos-studio-plus`).
+- **A bundle takes older products in.** `PaidProduct.includes` names them:
+  Worldbuilding takes in Cartographer, Casebook, Lorekeeper, Codex Bibles, the
+  Calendar Bible and Hearts & Tensions; Revise & Publish takes in Unblocked,
+  Press and Cover Studio; Studio Plus takes in the Common Room. One direction
+  and one level: a part does not open its bundle, and no bundle takes in a
+  bundle. `isBundle` and `includedIn` are derived from it.
+- **`Entitlements.opens(product)`** is what a gate asks: the account holds the
+  product, or a bundle that takes it in. **`owns` is unchanged and exact**, so
+  a list of purchases still reads as what was bought. `openedIds` gives the
+  same answer as wire ids, for a gate that is handed ids.
+- **`PaidProduct.isSubscription`**, true for Studio Plus only: the first
+  product not bought once. It says what kind of product it is; whether a
+  subscription is current is the paying service's to enforce by withdrawing
+  the grant.
+- Companion, Worldsmith, the Bookplate Maker and the retired Create bundle are
+  in no bundle. Create still takes nothing in here; the doors it opens are
+  named at the gates, as before.
+- A consumer must answer for the three new values wherever it switches on
+  `PaidProduct` exhaustively. Tests in `test/bundles_test.dart`.
+
 ## 0.22.0
 
 The three gaps AOS Worldsmith's Phase 2 audit of the world model found

@@ -2,7 +2,8 @@
 ///
 /// [ADR-0010](../../docs/architecture/ADR-0010-five-rooms-one-database.md)
 /// settles the ownership model: one-time products, not a subscription or tier
-/// ladder. [ADR-0015](../../docs/architecture/ADR-0015-the-catalogue-is-code.md)
+/// ladder. One exception since November 16, 2026, by the owner's decision:
+/// [PaidProduct.aosStudioPlus] is a subscription ([PaidProduct.isSubscription]). [ADR-0015](../../docs/architecture/ADR-0015-the-catalogue-is-code.md)
 /// extends that same catalogue to Curios: if this binary can deliver a product,
 /// it names that product here; price and checkout routing remain configuration.
 ///
@@ -203,7 +204,30 @@ enum PaidProduct {
   /// builder, author-written rules, hidden truths, bible export, and the
   /// political system bible (`PLAN.md` §3.58). The free bibles — blank,
   /// faction, creature, calendar — and their pages and entries never need it.
-  aosCodexBibles;
+  aosCodexBibles,
+
+  /// **AuthorOS Write 3.0's bundles** (the owner, November 16, 2026). Write is
+  /// cut back to a free writing application; what comes after the story is
+  /// written is sold as three bundles rather than a dozen packs. A bundle is
+  /// a product like any other — bought once or, for [aosStudioPlus],
+  /// subscribed to — and it **takes in** older products: see [includes].
+  ///
+  /// The story world in depth: World, the Codex, Knowledge, every bible, the
+  /// time rooms, the Loom and maps. Takes in [aosCartographer], [aosCasebook],
+  /// [aosLorekeeper], [aosCodexBibles], [calendarBible] and
+  /// [aosHeartsAndTensions]. Casebook stays buyable by itself as well.
+  aosWorldbuilding,
+
+  /// Turning a finished draft into a finished book: the revision desk and the
+  /// publishing desk, one bundle because revision without continuity — which
+  /// is free — is thin by itself. Takes in [aosUnblocked], [aosPress] and
+  /// [aosCoverStudio].
+  aosRevisePublish,
+
+  /// Sync across devices and the record of how the writing is going. The one
+  /// product that is a **subscription** ([isSubscription]): it is the one
+  /// with a running cost per author. Takes in [aosCommonRoom].
+  aosStudioPlus;
 
   /// The wire name, fixed independently of the Dart identifier.
   String get id => switch (this) {
@@ -221,6 +245,9 @@ enum PaidProduct {
         PaidProduct.aosCasebook => 'aos-casebook',
         PaidProduct.aosLorekeeper => 'aos-lorekeeper',
         PaidProduct.aosCodexBibles => 'aos-codex-bibles',
+        PaidProduct.aosWorldbuilding => 'aos-worldbuilding',
+        PaidProduct.aosRevisePublish => 'aos-revise-publish',
+        PaidProduct.aosStudioPlus => 'aos-studio-plus',
       };
 
   /// Whether this was once sold and is not offered any more.
@@ -262,7 +289,12 @@ enum PaidProduct {
         PaidProduct.calendarBible ||
         PaidProduct.aosCasebook ||
         PaidProduct.aosLorekeeper ||
-        PaidProduct.aosCodexBibles =>
+        PaidProduct.aosCodexBibles ||
+        // Added November 16, 2026, with the values. Not yet on sale, which is
+        // still not retired.
+        PaidProduct.aosWorldbuilding ||
+        PaidProduct.aosRevisePublish ||
+        PaidProduct.aosStudioPlus =>
           false,
       };
 
@@ -299,10 +331,60 @@ enum PaidProduct {
         PaidProduct.calendarBible ||
         PaidProduct.aosCasebook ||
         PaidProduct.aosLorekeeper ||
-        PaidProduct.aosCodexBibles =>
+        PaidProduct.aosCodexBibles ||
+        PaidProduct.aosWorldbuilding ||
+        PaidProduct.aosRevisePublish ||
+        PaidProduct.aosStudioPlus =>
           false,
         PaidProduct.bookplateMaker => true,
       };
+
+  /// The older products this one takes in: owning it opens everything owning
+  /// each of them would. Empty for a product that is not a bundle.
+  ///
+  /// **One direction only.** A bundle opens what its parts open; a part does
+  /// not open the rest of its bundle. Casebook opens the case bible and
+  /// nothing else of Worldbuilding's. And **one level only**: no bundle takes
+  /// in a bundle, which a test holds, so [Entitlements.opens] need not walk.
+  ///
+  /// The retired [aosCreate] is not listed anywhere and takes nothing in
+  /// here: the doors it opens are named at the gates that serve them, as they
+  /// always were, and stay open for whoever holds it.
+  Set<PaidProduct> get includes => switch (this) {
+        PaidProduct.aosWorldbuilding => const {
+            PaidProduct.aosCartographer,
+            PaidProduct.aosCasebook,
+            PaidProduct.aosLorekeeper,
+            PaidProduct.aosCodexBibles,
+            PaidProduct.calendarBible,
+            PaidProduct.aosHeartsAndTensions,
+          },
+        PaidProduct.aosRevisePublish => const {
+            PaidProduct.aosUnblocked,
+            PaidProduct.aosPress,
+            PaidProduct.aosCoverStudio,
+          },
+        PaidProduct.aosStudioPlus => const {PaidProduct.aosCommonRoom},
+        _ => const {},
+      };
+
+  /// Whether this is one of the bundles: a product that takes others in.
+  bool get isBundle => includes.isNotEmpty;
+
+  /// The bundles that take this product in.
+  Iterable<PaidProduct> get includedIn => [
+        for (final other in PaidProduct.values)
+          if (other.includes.contains(this)) other,
+      ];
+
+  /// Whether the product is paid for again and again rather than once.
+  ///
+  /// Every product was bought once until Studio Plus (ADR-0010). This says
+  /// only what kind of product it is. Whether a subscription is *current* is
+  /// not answered here or by [Entitlements]: an entitlement is a grant, and
+  /// the service that takes the payment is what withdraws it when a
+  /// subscription lapses.
+  bool get isSubscription => this == PaidProduct.aosStudioPlus;
 
   /// The product [id] names, or null when this build has never heard of it.
   ///
@@ -380,6 +462,25 @@ class Entitlements {
   bool get isEmpty => _byProductId.isEmpty;
 
   bool owns(PaidProduct product) => _byProductId.containsKey(product.id);
+
+  /// Whether the account may use what [product] sells: it holds [product], or
+  /// a bundle that takes it in ([PaidProduct.includes]).
+  ///
+  /// **A gate asks this; a list of purchases asks [owns].** `owns` is the
+  /// fact — this licence is held — and stays exact, so an author's purchases
+  /// read as what they bought. `opens` is the consequence a door cares about.
+  bool opens(PaidProduct product) =>
+      owns(product) || product.includedIn.any(owns);
+
+  /// The wire ids of everything this account may use: each product it holds,
+  /// each product a held bundle takes in, and each id it holds that this
+  /// build does not know. For a gate that is handed ids rather than asked.
+  Set<String> get openedIds => {
+        for (final held in all) held.productId,
+        for (final held in all)
+          for (final part in held.product?.includes ?? const <PaidProduct>{})
+            part.id,
+      };
 
   /// Entitlements for products this build has never heard of.
   ///
